@@ -1,6 +1,6 @@
 {
   "name": "@liquid-labs/bash-toolkit",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A collection of useful bash functions.",
   "files": [
     "src/"
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
   "devDependencies": {
-    "@liquid-labs/catalyst-scripts": ">1.0.0-alpha <2.0"
+    "@liquid-labs/catalyst-scripts": ">1.0.0-alpha.1 <2.0",
+    "shelljs": "^0.8.2"
   }
 }
