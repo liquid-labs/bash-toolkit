@@ -1,0 +1,31 @@
+{
+  "name": "@liquid-labs/bash-toolkit",
+  "version": "0.0.2",
+  "description": "A collection of useful bash functions.",
+  "files": [
+    "src/"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "catalyst-scripts \"$PWD\" lint",
+    "lint-fix": "catalyst-scripts \"$PWD\" lint-fix",
+    "install-clean": "rm -rf package-lock.json node_modules/ && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Liquid-Labs/bash-toolkit.git"
+  },
+  "keywords": [
+    "bash",
+    "toolkit"
+  ],
+  "author": "Zane Rockenbaugh <zane@liquid-labs.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Liquid-Labs/bash-toolkit/issues"
+  },
+  "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
+  "devDependencies": {
+    "@liquid-labs/catalyst-scripts": ">1.0.0-alpha <2.0"
+  }
+}
