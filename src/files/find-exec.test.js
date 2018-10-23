@@ -15,6 +15,15 @@ test('find-exec will find npm-local executables', () => {
   expect(result.code).toBe(0)
 })
 
+test('find-exec will search multiple NPM directories', () => {
+  const result = shell.exec(`source src/files/find-exec.func.sh && find-exec eslint /tmp /etc "$PWD"`, execOpts)
+  const expectedOut = expect.stringMatching(/eslint\s*$/)
+
+  expect(result.stderr).toEqual('')
+  expect(result.stdout).toEqual(expectedOut)
+  expect(result.code).toBe(0)
+})
+
 test('find-exec will find global executables', () => {
   let result = shell.exec(`source src/files/find-exec.func.sh && find-exec bash "$PWD"`, execOpts)
   const expectedOut = expect.stringMatching(/bash\s*$/)
