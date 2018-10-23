@@ -7,7 +7,7 @@ const execOpts = {
 }
 
 test('find-exec will find npm-local executables', () => {
-  let result = shell.exec(`source src/files/find-exec.func.sh && find-exec eslint "$PWD"`, execOpts)
+  const result = shell.exec(`source src/files/find-exec.func.sh && find-exec eslint "$PWD"`, execOpts)
   const expectedOut = expect.stringMatching(/eslint\s*$/)
 
   expect(result.stderr).toEqual('')
