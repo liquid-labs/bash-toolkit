@@ -1,18 +1,21 @@
 function find-exec() {
   local EXEC_NAME="$1"
-  local PACKAGE_ROOT="${2:-}"
 
   local EXEC=''
   # prefer the package-local exec, if available
-  if [[ -n "$PACKAGE_ROOT" ]]; then
+  local i=2
+  while [[ $i -le $# ]] && [[ ! -x "$EXEC" ]]; do
+    local PACKAGE_ROOT=${!i}
     pushd "$PACKAGE_ROOT" > /dev/null
     # Search for the exec locall, then globally.
     EXEC=$(npm bin)/$EXEC_NAME
     popd > /dev/null
-  fi
+    i=$(( $i + 1 ))
+  done
+  [[ -x "$EXEC" ]] || EXEC=$(npm bin -g)/$EXEC_NAME
   if [[ ! -x "$EXEC" ]]; then
-    if which -s "$EXEC_NAME"; then
-      EXEC="$EXEC_NAME"
+    if which -s $EXEC_NAME; then
+      EXEC=$EXEC_NAME
     else
       return 10
     fi
