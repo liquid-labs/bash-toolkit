@@ -1,2 +1,3 @@
-.catalyst
+/.catalyst
 node_modules/
+/test-staging

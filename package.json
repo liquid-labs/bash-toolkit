@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
   "devDependencies": {
-    "@liquid-labs/catalyst-scripts": ">1.0.0-alpha <2.0"
+    "@liquid-labs/catalyst-scripts": ">1.0.0-alpha.1 <2.0",
+    "shelljs": "^0.8.2"
   }
 }

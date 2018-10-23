@@ -11,8 +11,8 @@ function find-exec() {
     popd > /dev/null
   fi
   if [[ ! -x "$EXEC" ]]; then
-    if which -s catalyst-scripts; then
-      EXEC='catalyst-scripts'
+    if which -s "$EXEC_NAME"; then
+      EXEC="$EXEC_NAME"
     else
       return 10
     fi
