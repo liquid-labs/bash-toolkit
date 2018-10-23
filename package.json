@@ -3,8 +3,12 @@
   "version": "1.0.0-alpha.1",
   "description": "A collection of useful bash functions.",
   "files": [
+    "bin/",
     "src/"
   ],
+  "bin": {
+    "bash-toolkit-import": "bin/bash-toolkit-import.sh"
+  },
   "scripts": {
     "test": "npm run pretest && catalyst-scripts \"$PWD\" test",
     "lint": "catalyst-scripts \"$PWD\" lint",
