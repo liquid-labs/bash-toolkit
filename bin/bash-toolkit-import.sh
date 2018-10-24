@@ -6,7 +6,13 @@ if ! which -s perl; then
   exit 10
 fi
 if [[ -h "${BASH_SOURCE[0]}" ]]; then
+  START_DIR="$PWD"
+  # TODO: use the fact that resolving non-links is easier to import the 'get-real-path' function here
+  cd $(dirname "${BASH_SOURCE[0]}")
   MY_REAL_ROOT=$(dirname $(dirname $(readlink "${BASH_SOURCE[0]}")))
+  cd "$MY_REAL_ROOT"
+  MY_REAL_ROOT="$PWD"
+  cd "$START_DIR"
 else
   MY_REAL_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 fi
@@ -26,7 +32,10 @@ open(my $output, '>:encoding(UTF-8)', $output_file)
 while (<$input>) {
   if (/^\s*import (.+)/) {
     my $pattern=$1;
-    my $source_name=`find "$search_root" -name "$pattern*" -o -path "*$pattern*"`;
+    # In an earlier version, had tried to use '-not -name', but the need to use
+    # parents to group the tests seemed to cause problems with running the
+    # embedded script.
+    my $source_name=`find "$search_root" -name "$pattern*" -o -path "*$pattern*" | grep -v "\.test\." | grep -v "\.seqtest\."`;
     my $source_count = split(/\n/, $source_name);
     if ($source_count > 1) {
       print STDERR "Ambiguous results trying to import '$1' in '$input_file' @ line $. ";
@@ -37,6 +46,7 @@ while (<$input>) {
       die 10;
     }
     else {
+      chomp($source_name);
       open(my $source, '<:encoding(UTF-8)', $source_name)
         or die "Could not open source file '$source_name' for import in '$input_file' @ line $.";
       while (my $pattern_line = <$source>) {
@@ -55,5 +65,5 @@ cd $(npm root)/..
 for i in `find src -name "*.sh"`; do
   o=dist/${i:4}
   mkdir -p "$(dirname $o)"
-  perl -e "$SCRIPT" "$i" "$o" "$MY_REAL_ROOT"
+  perl -e "$SCRIPT" "$i" "$o" "$MY_REAL_ROOT/src"
 done
