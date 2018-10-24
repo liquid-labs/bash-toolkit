@@ -15,7 +15,7 @@ call from `prepare`; so long as it's in the process):
 
 === Non-npm usage
 
-The script doesn't currently support usage outside the npm ecosystem.
+[The script doesn't currently support usage outside the npm ecosystem.](https://github.com/Liquid-Labs/bash-toolkit/issues/4)
 
 === In your code
 
