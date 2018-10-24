@@ -7,9 +7,11 @@ const execOpts = {
 }
 
 beforeAll(() => {
-  shell.mkdir('/tmp/foo')
-  shell.mkdir('/tmp/foo/real_dir', '/tmp/foo/real_dir2')
+  // setup real dirs and file
+  ['/tmp/foo', '/tmp/foo/real_dir', '/tmp/foo/real_dir2']
+    .forEach((dir) => shell.mkdir(dir))
   shell.exec('touch /tmp/foo/real_dir/real_file')
+  // setup links
   shell.exec('ln -s /tmp/foo/real_dir /tmp/foo/link_dir')
   shell.exec('ln -s /tmp/foo/real_dir/real_file /tmp/foo/link_dir/link_file_abs')
   shell.exec('cd /tmp/foo/link_dir && ln -s ../real_dir/real_file link_file_rel')
