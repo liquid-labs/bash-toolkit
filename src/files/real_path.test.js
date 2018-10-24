@@ -23,32 +23,23 @@ afterAll(() => {
   shell.exec('rm -rf /tmp/foo')
 })
 
+const verifyLink = (linkPath, realPath) => {
+  const result =
+    shell.exec(`source src/files/real_path.func.sh && real_path ${linkPath}`, execOpts)
+  const expectedOut =
+    expect.stringMatching(new RegExp(`${realPath}\\s*$`))
+
+  expect(result.stderr).toEqual('')
+  expect(result.stdout).toEqual(expectedOut)
+  expect(result.code).toBe(0)
+}
+
 test('real_path should resolve absolute file links', () => {
-  let result = shell.exec(`source src/files/real_path.func.sh && real_path /tmp/foo/real_dir2/link_file_abs`, execOpts)
-  const expectedOut = expect.stringMatching(new RegExp('/tmp/foo/real_dir/real_file\\s*$'))
-
-  expect(result.stderr).toEqual('')
-  expect(result.stdout).toEqual(expectedOut)
-  expect(result.code).toBe(0)
-
-  result = shell.exec(`source src/files/real_path.func.sh && real_path /tmp/foo/link_dir/link_file_abs`, execOpts)
-
-  expect(result.stderr).toEqual('')
-  expect(result.stdout).toEqual(expectedOut)
-  expect(result.code).toBe(0)
+  verifyLink('/tmp/foo/real_dir2/link_file_abs', '/tmp/foo/real_dir/real_file')
+  verifyLink('/tmp/foo/link_dir/link_file_abs', '/tmp/foo/real_dir/real_file')
 })
 
 test('real_path should resolve relative file links', () => {
-  let result = shell.exec(`source src/files/real_path.func.sh && real_path /tmp/foo/real_dir2/link_file_rel`, execOpts)
-  const expectedOut = expect.stringMatching(new RegExp('/tmp/foo/real_dir/real_file\\s*$'))
-
-  expect(result.stderr).toEqual('')
-  expect(result.stdout).toEqual(expectedOut)
-  expect(result.code).toBe(0)
-
-  result = shell.exec(`source src/files/real_path.func.sh && real_path /tmp/foo/link_dir/link_file_rel`, execOpts)
-
-  expect(result.stderr).toEqual('')
-  expect(result.stdout).toEqual(expectedOut)
-  expect(result.code).toBe(0)
+  verifyLink('/tmp/foo/real_dir2/link_file_rel', '/tmp/foo/real_dir/real_file')
+  verifyLink('/tmp/foo/link_dir/link_file_rel', '/tmp/foo/real_dir/real_file')
 })
