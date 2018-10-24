@@ -8,9 +8,26 @@ A collection of useful bash functions.
 
     npm install @liquid-labs/bash-toolkit
 
-In the install process, copy the installed file to `lib` (by convention). This
-can be added to the npm `prepare` script:
+Include the following in the `prepare` script (or, as we do, include `build` and
+call from `prepare`; so long as it's in the process):
 
-    "prepare": "rsync -r --delete --exclude='*.test.*' --exclude='*.seqtest.*' node_modules/@liquid-labs/bash-toolkit/src/ lib/"
+    $(npm bin)/catalyst-bash-import
 
-Or where appropriate.
+=== Non-npm usage
+
+The script doesn't currently support usage outside the npm ecosystem.
+
+=== In your code
+
+Now, in your bash script, include the line:
+
+    import the-function-path
+
+If the name alone is not ambiguous, you can use it, or just get in the habit of
+including the folder hierarchy / scoped names; e.g.:
+
+    import files/find-exec
+
+The `bash-import` will inline the library function at that point.
+
+*CAVEATS* The bash source code must currently be in [`src`](https://github.com/Liquid-Labs/bash-toolkit/issues/2).
