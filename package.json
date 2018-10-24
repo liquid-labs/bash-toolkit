@@ -1,20 +1,21 @@
 {
   "name": "@liquid-labs/bash-toolkit",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "A collection of useful bash functions.",
   "files": [
-    "bin/",
+    "dist/",
     "src/"
   ],
   "bin": {
-    "bash-toolkit-import": "bin/bash-toolkit-import.sh"
+    "bash-toolkit-import": "dist/bash-toolkit-import.sh"
   },
   "scripts": {
+    "build": "./bin/bash-toolkit-import.sh bin",
     "test": "npm run pretest && catalyst-scripts \"$PWD\" test",
     "lint": "catalyst-scripts \"$PWD\" lint",
     "lint-fix": "catalyst-scripts \"$PWD\" lint-fix",
     "install-clean": "rm -rf package-lock.json node_modules/ && npm install",
-    "prepare": "npm run lint",
+    "prepare": "npm run lint && npm run build",
     "pretest": "catalyst-scripts \"$PWD\" pretest"
   },
   "repository": {

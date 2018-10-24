@@ -1,20 +1,20 @@
 #/usr/bin/env bash
 set -e
 
+SOURCE_DIR="${1:-src/}"
+
 if ! which -s perl; then
   echo "$(basename ${BASH_SOURCE[0]}) requires perl be installed." >&2
   exit 10
 fi
 if [[ -h "${BASH_SOURCE[0]}" ]]; then
-  START_DIR="$PWD"
-  # TODO: use the fact that resolving non-links is easier to import the 'get-real-path' function here
-  cd $(dirname "${BASH_SOURCE[0]}")
-  MY_REAL_ROOT=$(dirname $(dirname $(readlink "${BASH_SOURCE[0]}")))
-  cd "$MY_REAL_ROOT"
-  MY_REAL_ROOT="$PWD"
-  cd "$START_DIR"
+  # we are not a link when d eveloping ourselves, so we fall through to the
+  # easier 'else' and can build in 'get-real-path' for dist and duplication.
+  import get_real_path
+  # linked file with be in '/dist
+  MY_REAL_ROOT="$(dirname "$(dirname "$(get_real_path "${BASH_SOURCE[0]}")")")"
 else
-  MY_REAL_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
+  MY_REAL_ROOT="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
 fi
 
 SCRIPT=$(cat <<'EOF'
@@ -62,7 +62,7 @@ EOF
 )
 
 cd $(npm root)/..
-for i in `find src -name "*.sh"`; do
+for i in `find $SOURCE_DIR -name "*.sh"`; do
   o=dist/${i:4}
   mkdir -p "$(dirname $o)"
   perl -e "$SCRIPT" "$i" "$o" "$MY_REAL_ROOT/src"
