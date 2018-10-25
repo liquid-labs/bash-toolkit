@@ -10,7 +10,7 @@ function real_path {
 
   function trim_slash {
     # sed adds a newline ()
-    echo -n "$1" | sed 's/\/$//' | tr -d '\n'
+    printf "$1" | sed 's/\/$//' | tr -d '\n'
   }
   # [[ -h /foo/link_dir ]] works, but [[ -h /foo/link_dir/ ]] does not!
   FILE=`trim_slash "$FILE"`
@@ -20,13 +20,16 @@ function real_path {
       local POSSIBLE_REL_LINK="${1:-}"
       local APPEND="${2:-}"
       if [[ "$POSSIBLE_REL_LINK" == /* ]]; then
-        echo -n "$POSSIBLE_REL_LINK${APPEND}"
+        # for some reason 'echo -n' was echoing the '-n' when this was used
+        # included in the catalyst-scripts. Not sure why, and don't know how
+        # to test, but 'printf' does what we need.
+        printf "$POSSIBLE_REL_LINK${APPEND}"
       else
         # Now we go into the dir containg the link and then navigate the possibly
         # relative link to the real dir. The subshell preserves the caller's PWD.
         (cd "$(dirname "$FILE")"
         cd "$POSSIBLE_REL_LINK"
-        echo -n "${PWD}${APPEND}")
+        printf "${PWD}${APPEND}")
       fi
     }
 
@@ -39,6 +42,6 @@ function real_path {
       resolve_link "$(readlink "$FILE")"
     fi
   else
-    echo -n "$FILE"
+    printf "$FILE"
   fi
 }
