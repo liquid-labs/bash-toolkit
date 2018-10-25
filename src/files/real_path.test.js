@@ -42,6 +42,7 @@ const verifyLink = (linkPath, expectedOut) => {
   expect(result.stderr).toEqual('')
   expect(result.stdout).toEqual(expectedOut)
   expect(result.code).toBe(0)
+
 }
 
 test('real_path should resolve absolute file links', () => {
@@ -73,4 +74,15 @@ test('real_path should resolve non-links to themselves', () => {
 test('real_path should trim trailng dir-slash', () => {
   verifyLink('/tmp/foo/real_dir/', realDir)
   verifyLink('/tmp/foo/link_dir/', realDir)
+})
+
+test('real_path should end in the same working directory', () => {
+  // The issue was uncovered when resolving a relative link.
+  const startDir = shell.pwd() + '' // .pwd() is returning an object...
+  const result =
+    shell.exec(`source src/files/real_path.func.sh && real_path /tmp/foo/real_dir2/link_file_rel >/dev/null && echo -n "$PWD"`, execOpts)
+
+  expect(result.stderr).toEqual('')
+  expect(result.stdout).toEqual(startDir)
+  expect(result.code).toBe(0)
 })
