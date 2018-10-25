@@ -10,9 +10,9 @@ fi
 if [[ -h "${BASH_SOURCE[0]}" ]]; then
   # we are not a link when d eveloping ourselves, so we fall through to the
   # easier 'else' and can build in 'get-real-path' for dist and duplication.
-  import get_real_path
+  import real_path
   # linked file with be in '/dist
-  MY_REAL_ROOT="$(dirname "$(dirname "$(get_real_path "${BASH_SOURCE[0]}")")")"
+  MY_REAL_ROOT="$(dirname "$(dirname "$(real_path "${BASH_SOURCE[0]}")")")"
 else
   MY_REAL_ROOT="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
 fi

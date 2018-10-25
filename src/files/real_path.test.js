@@ -1,4 +1,4 @@
-/* global test, expect, jest, beforeAll */
+/* global test, expect, beforeAll, afterAll */
 const shell = require('shelljs')
 
 const execOpts = {
@@ -32,7 +32,7 @@ afterAll(() => {
   shell.exec('rm -rf /tmp/foo')
 })
 
-const realFile = expect.stringMatching(new RegExp(`/tmp/foo/real_dir/real_file\\s*$`))
+const realFile = `/tmp/foo/real_dir/real_file`
 const realDir = expect.stringMatching(new RegExp(`/tmp/foo/real_dir\\s*$`))
 
 const verifyLink = (linkPath, expectedOut) => {
@@ -63,4 +63,14 @@ test('real_path should resolve absolute directoy links', () => {
 test('real_path should resolve relative directoy links', () => {
   verifyLink('/tmp/foo/real_dir2/link_dir_rel', realDir)
   verifyLink('/tmp/foo/link_dir/link_dir_rel', realDir)
+})
+
+test('real_path should resolve non-links to themselves', () => {
+  verifyLink('/tmp/foo/real_dir', realDir)
+  verifyLink('/tmp/foo/real_dir/real_file', realFile)
+})
+
+test('real_path should trim trailng dir-slash', () => {
+  verifyLink('/tmp/foo/real_dir/', realDir)
+  verifyLink('/tmp/foo/link_dir/', realDir)
 })

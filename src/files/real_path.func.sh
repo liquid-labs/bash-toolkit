@@ -8,19 +8,26 @@ function real_path {
     return 1
   fi
 
+  function trim_slash {
+    # sed adds a newline ()
+    echo -n "$1" | sed 's/\/$//' | tr -d '\n'
+  }
+  # [[ -h /foo/link_dir ]] works, but [[ -h /foo/link_dir/ ]] does not!
+  FILE=`trim_slash "$FILE"`
+
   if [[ -h "$FILE" ]]; then
     function resolve_link {
       local POSSIBLE_REL_LINK="${1:-}"
       local APPEND="${2:-}"
       if [[ "$POSSIBLE_REL_LINK" == /* ]]; then
-        echo "$POSSIBLE_REL_LINK${APPEND}"
+        echo -n "$POSSIBLE_REL_LINK${APPEND}"
       else
         # now we go into the dir containg the link and then navigate the possibly
         # relative link to the real dir
         cd "$START_DIR"
         cd "$(dirname "$FILE")"
         cd "$POSSIBLE_REL_LINK"
-        echo "${PWD}${APPEND}"
+        echo -n "${PWD}${APPEND}"
         cd "$START_DIR"
       fi
     }
@@ -35,6 +42,6 @@ function real_path {
       resolve_link "$(readlink "$FILE")"
     fi
   else
-    echo "$FILE"
+    echo -n "$FILE"
   fi
 }
