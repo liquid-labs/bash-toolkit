@@ -22,17 +22,14 @@ function real_path {
       if [[ "$POSSIBLE_REL_LINK" == /* ]]; then
         echo -n "$POSSIBLE_REL_LINK${APPEND}"
       else
-        # now we go into the dir containg the link and then navigate the possibly
-        # relative link to the real dir
-        cd "$START_DIR"
-        cd "$(dirname "$FILE")"
+        # Now we go into the dir containg the link and then navigate the possibly
+        # relative link to the real dir. The subshell preserves the caller's PWD.
+        (cd "$(dirname "$FILE")"
         cd "$POSSIBLE_REL_LINK"
-        echo -n "${PWD}${APPEND}"
-        cd "$START_DIR"
+        echo -n "${PWD}${APPEND}")
       fi
     }
 
-    # local START_DIR="$PWD"
     if [[ ! -d "$FILE" ]]; then
       # we need to get the real path to the real file
       local REAL_FILE_LINK_PATH="$(readlink "$FILE")"
