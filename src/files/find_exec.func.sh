@@ -1,4 +1,4 @@
-function find-exec() {
+function find_exec {
   local EXEC_NAME="$1"
 
   local EXEC=''
@@ -26,7 +26,7 @@ function find-exec() {
 
 function require-exec() {
   local EXEC_NAME="$1"
-  if ! find-exec "$@"; then
+  if ! find_exec "$@"; then
     echo "Could not locate executable '$EXEC_NAME'; bailing out." >&2
     exit 10
   fi

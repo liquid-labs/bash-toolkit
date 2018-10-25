@@ -26,7 +26,7 @@ Now, in your bash script, include the line:
 If the name alone is not ambiguous, you can use it, or just get in the habit of
 including the folder hierarchy / scoped names; e.g.:
 
-    import files/find-exec
+    import files/find_exec
 
 The `bash-import` will inline the library function at that point.
 
