@@ -11,12 +11,21 @@ beforeAll(() => {
   ['/tmp/foo', '/tmp/foo/real_dir', '/tmp/foo/real_dir2']
     .forEach((dir) => shell.mkdir(dir))
   shell.exec('touch /tmp/foo/real_dir/real_file')
-  // setup links
+  // link dir to contain other link
   shell.exec('ln -s /tmp/foo/real_dir /tmp/foo/link_dir')
+  // setup links
+  // absolute file links
   shell.exec('ln -s /tmp/foo/real_dir/real_file /tmp/foo/link_dir/link_file_abs')
-  shell.exec('cd /tmp/foo/link_dir && ln -s ../real_dir/real_file link_file_rel')
   shell.exec('ln -s /tmp/foo/real_dir/real_file /tmp/foo/real_dir2/link_file_abs')
+  // rel file links
+  shell.exec('cd /tmp/foo/link_dir && ln -s ../real_dir/real_file link_file_rel')
   shell.exec('cd /tmp/foo/real_dir2 && ln -s ../real_dir/real_file link_file_rel')
+  // abs dir links
+  shell.exec('ln -s /tmp/foo/real_dir /tmp/foo/real_dir2/link_dir_abs')
+  shell.exec('ln -s /tmp/foo/real_dir /tmp/foo/link_dir/link_dir_abs')
+  // rel dir links
+  shell.exec('cd /tmp/foo/link_dir && ln -s ../real_dir link_dir_rel')
+  shell.exec('cd /tmp/foo/real_dir2 && ln -s ../real_dir link_dir_rel')
 })
 
 afterAll(() => {
@@ -43,4 +52,15 @@ test('real_path should resolve absolute file links', () => {
 test('real_path should resolve relative file links', () => {
   verifyLink('/tmp/foo/real_dir2/link_file_rel', realFile)
   verifyLink('/tmp/foo/link_dir/link_file_rel', realFile)
+})
+
+test('real_path should resolve absolute directoy links', () => {
+  verifyLink('/tmp/foo/real_dir2/link_dir_abs', realDir)
+  verifyLink('/tmp/foo/link_dir', realDir)
+  verifyLink('/tmp/foo/link_dir/link_dir_abs', realDir)
+})
+
+test('real_path should resolve relative directoy links', () => {
+  verifyLink('/tmp/foo/real_dir2/link_dir_rel', realDir)
+  verifyLink('/tmp/foo/link_dir/link_dir_rel', realDir)
 })

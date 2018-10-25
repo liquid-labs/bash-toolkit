@@ -23,7 +23,15 @@ function real_path {
       cd "$START_DIR"
     else
       # we need to get the real path of the linked directory
-      echo $(readlink "$FILE")
+      local POSSIBLE_REL_LINK="$(readlink "$FILE")"
+      if [[ "$POSSIBLE_REL_LINK" == /* ]]; then
+        echo "$POSSIBLE_REL_LINK"
+      else
+        cd "$(dirname "$FILE")"
+        cd "$POSSIBLE_REL_LINK"
+        echo "$PWD"
+        cd "$START_DIR"
+      fi
     fi
   else
     echo "$FILE"
