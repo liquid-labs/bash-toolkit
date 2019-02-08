@@ -14,7 +14,7 @@
     "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./src",
 
     "pretest": "catalyst-scripts pretest",
-    "test": "npm run pretest && catalyst-script test",
+    "test": "catalyst-scripts test",
 
     "install-clean": "rm -rf package-lock.json node_modules/ && npm install",
     "prepare": "npm run build",
@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
   "devDependencies": {
-    "@liquid-labs/catalyst-scripts": ">=1.0.0-alpha.6 <2",
+    "@liquid-labs/catalyst-scripts": "latest",
     "shelljs": "^0.8.2",
     "watch": "^1.0.2"
   }
