@@ -10,11 +10,15 @@
     "rollup-bash": "dist/rollup-bash.sh"
   },
   "scripts": {
-    "build": "./bin/bash-toolkit-import.sh bin",
-    "test": "npm run pretest && catalyst-script test",
-    "install-clean": "rm -rf package-lock.json node_modules/ && npm install",
-    "prepare": "npm run lint && npm run build",
+    "prebuild": "rm -rf ./dist/*",
+    "build": "./bin/rollup-bash.sh bin",
+
     "pretest": "catalyst-scripts pretest",
+    "test": "npm run pretest && catalyst-script test",
+
+    "install-clean": "rm -rf package-lock.json node_modules/ && npm install",
+    "prepare": "npm run build",
+
     "watch": "watch 'npm run build' ./src"
   },
   "repository": {
