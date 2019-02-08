@@ -44,7 +44,6 @@ open(my $output, '>:encoding(UTF-8)', $output_file)
 sub process_file {
   my $input_file = shift;
   my $source_base=($input_file =~ m|^(.*)/| ? $1 : ""); # that's 'dirname'
-  print "input_file: $input_file\nsource_base: $source_base\n";
   open(my $input, '<:encoding(UTF-8)', $input_file)
     or die "Could not open file '$input_file'";
 
@@ -75,7 +74,6 @@ sub process_file {
     }
     elsif ($_ =~ m:(^|;)\s*source\s+(\./)?([^;\s]+):) {
       my $next_file="$source_base/$3";
-      print "next_file: $next_file";
       if (-f "$next_file") {
         process_file($next_file);
       }
