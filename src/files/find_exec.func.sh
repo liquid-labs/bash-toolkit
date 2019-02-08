@@ -1,18 +1,21 @@
 function find_exec {
-  local EXEC_NAME="$1"
+  local EXEC_NAME="$1"; shift
 
-  local EXEC=''
-  # prefer the package-local exec, if available
-  local i=2
-  while (( $i > $# )) && [[ ! -x "$EXEC" ]]; do
-    local PACKAGE_ROOT=${!i}
-    pushd "$PACKAGE_ROOT" > /dev/null
-    # Search for the exec locall, then globally.
-    EXEC=$(npm bin)/$EXEC_NAME
-    popd > /dev/null
-    i=$(( $i + 1 ))
-  done
+  # first, we look if it's in our own bin
+  local EXEC="$(npm bin)/$EXEC_NAME"
+  # next, we check other named package directories (if any)
+  if [[ ! -x "$EXEC" ]]; then
+    local SEARCH_PACKAGE
+    for SEARCH_PACKAGE in "$@"; do
+      pushd "$SEARCH_PACKAGE" > /dev/null
+      EXEC=$(npm bin)/$EXEC_NAME
+      if [[ -x "$EXEC" ]]; then break; fi
+      popd > /dev/null
+    done
+  fi
+  # next, we try global npm
   [[ -x "$EXEC" ]] || EXEC=$(npm bin -g)/$EXEC_NAME
+  # finally, we look in the system PATH
   if [[ ! -x "$EXEC" ]]; then
     if which -s $EXEC_NAME; then
       EXEC=$EXEC_NAME
