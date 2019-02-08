@@ -7,7 +7,7 @@
     "src/"
   ],
   "bin": {
-    "bash-toolkit-import": "dist/bash-toolkit-import.sh"
+    "rollup-bash": "dist/rollup-bash.sh"
   },
   "scripts": {
     "build": "./bin/bash-toolkit-import.sh bin",
