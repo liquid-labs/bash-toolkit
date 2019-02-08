@@ -1,5 +1,9 @@
 #/usr/bin/env bash
-set -e
+
+# bash strict settings
+set -o errexit # exit on errors
+set -o nounset # exit on use of uninitialized variable
+set -o pipefail
 
 SOURCE_DIR="${1:-src/}"
 
@@ -8,12 +12,12 @@ if ! which -s perl; then
   exit 10
 fi
 if [[ -h "${BASH_SOURCE[0]}" ]]; then
-  # we are not a link when d eveloping ourselves, so we fall through to the
-  # easier 'else' and can build in 'get-real-path' for dist and duplication.
   import real_path
   # linked file with be in '/dist
   MY_REAL_ROOT="$(dirname "$(dirname "$(real_path "${BASH_SOURCE[0]}")")")"
 else
+  # we are not a link when developing ourselves, so we fall through to the
+  # easier 'else' and can build in 'get-real-path' for dist and duplication.
   MY_REAL_ROOT="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
 fi
 
@@ -61,7 +65,6 @@ while (<$input>) {
 EOF
 )
 
-cd $(npm root)/..
 for i in `find $SOURCE_DIR -name "*.sh"`; do
   o=dist/${i:4}
   mkdir -p "$(dirname $o)"
