@@ -1,33 +1,41 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 # bash strict settings
 set -o errexit # exit on errors
 set -o nounset # exit on use of uninitialized variable
 set -o pipefail
 
-SOURCE_DIR="${1:-src/}"
+MAIN_FILE="${1}"; shift
+OUT_FILE="${1}"; shift
+SEARCH_DIRS="$@"
+
+if [[ "${BASH_SOURCE[0]}" != "${MAIN_FILE}" ]]; then
+  STD_DIR="$(npm explore @liquid-labs/bash-toolkit -- pwd)/src"
+  if [[ -n "${SEARCH_DIRS}" ]]; then
+    SEARCH_DIRS="${SEARCH_DIRS} $STD_DIR"
+  else
+    SEARCH_DIRS="$STD_DIR"
+  fi
+else # We are building ourselves, so we shim our functions.
+  function echoerrandexit() {
+    echo -e "${1}" >&2
+    exit ${2:-1}
+  }
+fi
 
 if ! which -s perl; then
-  echo "$(basename ${BASH_SOURCE[0]}) requires perl be installed." >&2
+  echoerrandexit "Perl is required."
   exit 10
-fi
-if [[ -h "${BASH_SOURCE[0]}" ]]; then
-  import real_path
-  # linked file with be in '/dist
-  MY_REAL_ROOT="$(dirname "$(dirname "$(real_path "${BASH_SOURCE[0]}")")")"
-else
-  # we are not a link when developing ourselves, so we fall through to the
-  # easier 'else' and can build in 'get-real-path' for dist and duplication.
-  MY_REAL_ROOT="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
 fi
 
 SCRIPT=$(cat <<'EOF'
 use strict;
 use warnings;
 
-my $input_file=$ARGV[0];
-my $output_file=$ARGV[1];
-my $search_root=$ARGV[2];
+my $input_file=shift;
+my $output_file=shift;
+my @search_dirs=@ARGV;
+my $find_search=join(' ', map("'$_'", @search_dirs));
 open(my $input, '<:encoding(UTF-8)', $input_file)
   or die "Could not open file '$input_file'";
 open(my $output, '>:encoding(UTF-8)', $output_file)
@@ -39,7 +47,7 @@ while (<$input>) {
     # In an earlier version, had tried to use '-not -name', but the need to use
     # parents to group the tests seemed to cause problems with running the
     # embedded script.
-    my $source_name=`find "$search_root" -name "$pattern*" -o -path "*$pattern*" | grep -v "\.test\." | grep -v "\.seqtest\."`;
+    my $source_name=`find $find_search -name "$pattern*" -o -path "*$pattern*" | grep -v "\.test\." | grep -v "\.seqtest\."`;
     my $source_count = split(/\n/, $source_name);
     if ($source_count > 1) {
       print STDERR "Ambiguous results trying to import '$1' in '$input_file' @ line $. ";
@@ -65,8 +73,8 @@ while (<$input>) {
 EOF
 )
 
-for i in `find $SOURCE_DIR -name "*.sh"`; do
-  o=dist/${i:4}
-  mkdir -p "$(dirname $o)"
-  perl -e "$SCRIPT" "$i" "$o" "$MY_REAL_ROOT/src"
-done
+perl -e "$SCRIPT" "${MAIN_FILE}" "${OUT_FILE}" $SEARCH_DIRS
+
+if [[ $(head -n 1 "$MAIN_FILE") == "#!"* ]]; then
+  chmod a+x "${OUT_FILE}"
+fi

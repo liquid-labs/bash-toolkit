@@ -10,8 +10,8 @@
     "rollup-bash": "dist/rollup-bash.sh"
   },
   "scripts": {
-    "prebuild": "rm -rf ./dist/*",
-    "build": "./bin/rollup-bash.sh bin",
+    "prebuild": "mkdir -p ./dist && rm -rf ./dist/*",
+    "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./src",
 
     "pretest": "catalyst-scripts pretest",
     "test": "npm run pretest && catalyst-script test",
