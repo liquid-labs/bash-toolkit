@@ -7,16 +7,19 @@
     "src/"
   ],
   "bin": {
-    "bash-toolkit-import": "dist/bash-toolkit-import.sh"
+    "rollup-bash": "dist/rollup-bash.sh"
   },
   "scripts": {
-    "build": "./bin/bash-toolkit-import.sh bin",
-    "test": "npm run pretest && catalyst-scripts \"$PWD\" test",
-    "lint": "catalyst-scripts \"$PWD\" lint",
-    "lint-fix": "catalyst-scripts \"$PWD\" lint-fix",
+    "prebuild": "mkdir -p ./dist && rm -rf ./dist/*",
+    "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./src",
+
+    "pretest": "catalyst-scripts pretest",
+    "test": "catalyst-scripts test",
+
     "install-clean": "rm -rf package-lock.json node_modules/ && npm install",
-    "prepare": "npm run lint && npm run build",
-    "pretest": "catalyst-scripts \"$PWD\" pretest"
+    "prepare": "npm run build",
+
+    "watch": "watch 'npm run build' ./src"
   },
   "repository": {
     "type": "git",
@@ -33,7 +36,8 @@
   },
   "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
   "devDependencies": {
-    "@liquid-labs/catalyst-scripts": ">=1.0.0-alpha.6 <2",
-    "shelljs": "^0.8.2"
+    "@liquid-labs/catalyst-scripts": "latest",
+    "shelljs": "^0.8.2",
+    "watch": "^1.0.2"
   }
 }
