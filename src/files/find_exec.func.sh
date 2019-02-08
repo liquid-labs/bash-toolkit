@@ -4,7 +4,7 @@ function find_exec {
   local EXEC=''
   # prefer the package-local exec, if available
   local i=2
-  while [[ $i -le $# ]] && [[ ! -x "$EXEC" ]]; do
+  while (( $i > $# )) && [[ ! -x "$EXEC" ]]; do
     local PACKAGE_ROOT=${!i}
     pushd "$PACKAGE_ROOT" > /dev/null
     # Search for the exec locall, then globally.
