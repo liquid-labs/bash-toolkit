@@ -1,10 +1,5 @@
 /* global test, expect, beforeAll, afterAll */
-const shell = require('shelljs')
-
-const execOpts = {
-  shell  : shell.which('bash'),
-  silent : true,
-}
+import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 beforeAll(() => {
   // setup real dirs and file
@@ -39,10 +34,7 @@ const verifyLink = (linkPath, expectedOut) => {
   const result =
     shell.exec(`source src/files/real_path.func.sh && real_path ${linkPath}`, execOpts)
 
-  expect(result.stderr).toEqual('')
-  expect(result.stdout).toEqual(expectedOut)
-  expect(result.code).toBe(0)
-
+  assertMatchNoError(result, expectedOut)
 }
 
 test('real_path should resolve absolute file links', () => {
