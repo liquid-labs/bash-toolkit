@@ -47,8 +47,14 @@ my @search_dirs=@ARGV;
 
 my $find_search=join(' ', map("'$_'", @search_dirs));
 
-open(my $output, '>:encoding(UTF-8)', $output_file)
-  or die "Could not open file '$output_file'";
+my $output;
+if ("$output_file" eq "-") {
+  $output = *STDOUT;
+}
+else {
+  open($output, '>:encoding(UTF-8)', $output_file)
+    or die "Could not open file '$output_file'";
+}
 
 my $sourced_files = {};
 

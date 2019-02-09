@@ -1,3 +1,5 @@
+import echoerr
+
 function find_exec {
   local EXEC_NAME="$1"; shift
 
@@ -30,7 +32,6 @@ function find_exec {
 function require-exec() {
   local EXEC_NAME="$1"
   if ! find_exec "$@"; then
-    echo "Could not locate executable '$EXEC_NAME'; bailing out." >&2
-    exit 10
+    echoerrandexit "Could not locate executable '$EXEC_NAME'; bailing out."
   fi
 }

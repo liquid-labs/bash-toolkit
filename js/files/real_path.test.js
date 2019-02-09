@@ -1,4 +1,5 @@
 /* global test, expect, beforeAll, afterAll */
+import { assertMatchNoError } from '../testlib'
 const shell = require('shelljs')
 
 const execOpts = {
@@ -39,10 +40,7 @@ const verifyLink = (linkPath, expectedOut) => {
   const result =
     shell.exec(`source src/files/real_path.func.sh && real_path ${linkPath}`, execOpts)
 
-  expect(result.stderr).toEqual('')
-  expect(result.stdout).toEqual(expectedOut)
-  expect(result.code).toBe(0)
-
+  assertMatchNoError(result, expectedOut)
 }
 
 test('real_path should resolve absolute file links', () => {
