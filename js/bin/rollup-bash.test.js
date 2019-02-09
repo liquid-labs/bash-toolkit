@@ -1,11 +1,5 @@
 /* global test, expect, jest */
-import { assertMatchNoError } from '../testlib'
-const shell = require('shelljs')
-
-const execOpts = {
-  shell  : shell.which('bash'),
-  silent : true,
-}
+import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 test('rollup-bash will inline basic source', () => {
   shell.exec(`./dist/rollup-bash.sh ./data/files/test/source_basic.sh ./test-tmp/source_basic.sh`, execOpts)

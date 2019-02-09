@@ -1,11 +1,5 @@
 /* global test, expect, beforeAll, afterAll */
-import { assertMatchNoError } from '../testlib'
-const shell = require('shelljs')
-
-const execOpts = {
-  shell  : shell.which('bash'),
-  silent : true,
-}
+import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 beforeAll(() => {
   // setup real dirs and file

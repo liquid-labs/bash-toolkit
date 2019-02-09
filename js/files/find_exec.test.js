@@ -1,11 +1,5 @@
 /* global test, expect, jest */
-import { assertMatchNoError } from '../testlib'
-const shell = require('shelljs')
-
-const execOpts = {
-  shell  : shell.which('bash'),
-  silent : true,
-}
+import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 // TODO: run once and capture inresult
 const findExecCompiled = 'eval "$(./dist/rollup-bash.sh src/files/find_exec.func.sh -)"'
