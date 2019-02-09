@@ -12,11 +12,12 @@
   "scripts": {
     "prebuild": "mkdir -p ./dist && rm -rf ./dist/*",
     "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./src",
-    "pretest": "catalyst-scripts pretest",
+    "pretest": "catalyst-scripts pretest && mkdir -p test-tmp/",
     "test": "catalyst-scripts test",
+    "posttest": "rm -rf test-tmp/",
     "install-clean": "rm -rf package-lock.json node_modules/ && npm install",
     "prepare": "npm run build",
-    "watch": "watch 'npm run build' ./src"
+    "watch": "watch 'npm run build' ./src ./bin"
   },
   "repository": {
     "type": "git",
