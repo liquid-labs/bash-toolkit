@@ -1,6 +1,6 @@
 {
   "name": "@liquid-labs/bash-toolkit",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "description": "A collection of useful bash functions.",
   "files": [
     "dist/",
@@ -17,9 +17,8 @@
     "test": "catalyst-scripts test",
     "posttest": "rm -rf test-tmp/",
     "preversion": "npm test",
-    "version": "npm run build && git add -A dist",
+    "version": "npm run build && git add -fA dist",
     "postversion": "git push && git push --tags",
-    "version": "npm run build && git add -A dist",
     "prepare": "npm run build",
     "install-clean": "rm -rf package-lock.json node_modules/ && npm install"
   },
