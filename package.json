@@ -13,11 +13,15 @@
     "prebuild": "mkdir -p ./dist && rm -rf ./dist/*",
     "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./src",
     "pretest": "catalyst-scripts pretest && mkdir -p test-tmp/",
+    "watch": "watch 'npm run build' ./src ./bin",
     "test": "catalyst-scripts test",
     "posttest": "rm -rf test-tmp/",
-    "install-clean": "rm -rf package-lock.json node_modules/ && npm install",
+    "preversion": "npm test",
+    "version": "npm run build && git add -A dist",
+    "postversion": "git push && git push --tags",
+    "version": "npm run build && git add -A dist",
     "prepare": "npm run build",
-    "watch": "watch 'npm run build' ./src ./bin"
+    "install-clean": "rm -rf package-lock.json node_modules/ && npm install"
   },
   "repository": {
     "type": "git",
