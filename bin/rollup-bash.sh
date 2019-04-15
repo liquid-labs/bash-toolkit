@@ -12,7 +12,9 @@ SEARCH_DIRS="$@"
 if [[ "${BASH_SOURCE[0]}" == "${MAIN_FILE}" ]]; then
   # We are building ourselves and we need to shim our functions.
   echoerrandexit() {
-    echo "${1}" >&2
+    local red=`tput setaf 1`
+    local reset=`tput sgr0`
+    echo -e "${red}$*${reset}" | fold -sw 82 >&2
     exit ${2:-}
   }
 else
@@ -28,6 +30,8 @@ else
   else
     SEARCH_DIRS="$STD_DIR"
   fi
+
+  import echoerr
 fi
 
 if ! which -s perl; then
@@ -39,6 +43,7 @@ fi
 SCRIPT=$(cat <<'EOF'
 use strict;
 use warnings;
+use Term::ANSIColor;
 use File::Spec;
 
 my $main_file=shift;
@@ -57,6 +62,14 @@ else {
 }
 
 my $sourced_files = {};
+
+sub printErr {
+  my $msg = shift;
+
+  print STDERR color('red');
+  print STDERR "$msg\n";
+  print STDERR color('reset');
+}
 
 sub process_file {
   my $input_file = shift;
@@ -83,11 +96,11 @@ sub process_file {
       my $source_name=`find $find_search -name "$pattern*" -o -path "*$pattern*" | grep -v "\.test\." | grep -v "\.seqtest\."`;
       my $source_count = split(/\n/, $source_name);
       if ($source_count > 1) {
-        print STDERR "Ambiguous results trying to import '$1' in '$input_file' @ line $.\n";
+        printErr "Ambiguous results trying to import '$1' in file $input_file".'@'."$.";
         die 10;
       }
       elsif ($source_count == 0) {
-        print STDERR "No source found trying to import '$1' in '$input_file' @ line $.\n";
+        printErr "No source found trying to import '$1' in file $input_file".'@'."$.";
         die 10;
       }
       else {
@@ -106,7 +119,7 @@ sub process_file {
         process_file($next_file);
       }
       else {
-        print STDERR "No source found trying to source '$source_spec' in $input_file".'@'."$.\n";
+        printErr "No source found trying to source '$source_spec' in file $input_file".'@'."$.";
         print $output $_;
       }
     }
@@ -121,9 +134,12 @@ process_file($main_file);
 EOF
 )
 
-# perl -e "$SCRIPT" "${MAIN_FILE}" "${OUT_FILE}" $SEARCH_DIRS
 perl -e "$SCRIPT" "${MAIN_FILE}" "${OUT_FILE}" $SEARCH_DIRS
 
-if [[ $(head -n 1 "$MAIN_FILE") == "#!"* ]]; then
-  chmod a+x "${OUT_FILE}"
+if [[ "${OUT_FILE}" != '-' ]]; then
+  if [[ $(head -n 1 "$MAIN_FILE") == "#!"* ]]; then
+    chmod a+x "${OUT_FILE}"
+  fi
+
+  $(bash -n "${OUT_FILE}") || echoerrandexit "The rollup-script has syntax errors. See output above."
 fi
