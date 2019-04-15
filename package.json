@@ -12,9 +12,9 @@
   "scripts": {
     "prebuild": "mkdir -p ./dist && rm -rf ./dist/*",
     "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./src",
-    "pretest": "catalyst-scripts pretest && mkdir -p test-tmp/",
     "watch": "watch 'npm run build' ./src ./bin",
-    "test": "catalyst-scripts test",
+    "pretest": "TEST_TYPES=unit catalyst-scripts pretest && mkdir -p test-tmp/",
+    "test": "TEST_TYPES=unit catalyst-scripts test",
     "posttest": "rm -rf test-tmp/",
     "preversion": "npm test",
     "version": "npm run build && git add -fA dist",
@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
   "devDependencies": {
-    "@liquid-labs/catalyst-scripts": "latest",
+    "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.19",
     "shelljs": "^0.8.2",
     "watch": "^1.0.2"
   }
