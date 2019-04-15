@@ -13,6 +13,7 @@
     "prebuild": "mkdir -p ./dist && rm -rf ./dist/*",
     "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./src",
     "watch": "watch 'npm run build' ./src ./bin",
+    "lint": "catalyst-scripts lint",
     "pretest": "TEST_TYPES=unit catalyst-scripts pretest && mkdir -p test-tmp/",
     "test": "TEST_TYPES=unit catalyst-scripts test",
     "posttest": "rm -rf test-tmp/",

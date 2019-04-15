@@ -1,4 +1,4 @@
-/* global test, expect, beforeAll, afterAll */
+/* global test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 test('list-add-item should append items', () => {

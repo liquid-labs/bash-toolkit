@@ -1,3 +1,4 @@
+/* global expect */
 const shell = require('shelljs')
 
 const execOpts = {

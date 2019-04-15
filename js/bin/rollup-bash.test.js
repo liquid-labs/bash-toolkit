@@ -1,4 +1,4 @@
-/* global test, expect, jest */
+/* global test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 test('rollup-bash will inline basic source', () => {
