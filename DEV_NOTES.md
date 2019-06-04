@@ -1,5 +1,5 @@
 == Function naming convention
 
-We would actually prefer hyphenated names like `find-exec`, but those can cause
-problems (empirically confirmed 2018-10-24 while testing updates for
-1.0.0-alpha3), so we settle on snake case like `find_exec`.
+We prefer the hyphenated, but due to 'sh' vs. 'bash' confusion in the original
+version, some functions use underscores. We should update the names prior to
+1.0 GA.
