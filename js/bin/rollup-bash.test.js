@@ -1,4 +1,4 @@
-/* global test, expect */
+/* global afterAll describe expect test */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 describe('rollup-bash', () => {
