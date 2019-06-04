@@ -15,24 +15,51 @@ list-add-item() {
 list-get-index() {
   local LIST_VAR="${1}"
   local TEST="${2}"
+  local SEP="${3:- }"
 
-  local ITEM
+  local ITEMS ITEM
   local INDEX=0
-  for ITEM in ${!LIST_VAR}; do
-    if [[ "$ITEM" == "$TEST" ]]; then
-      echo $INDEX
-      return
+  while IFS="$SEP" read -ra ITEMS; do
+    # the newline handling isn't strictly necessary, but makes things more
+    # clear?
+    if [[ "$SEP" == $'\n' ]]; then # see note in 'list-get-item' re. $'\n'
+      if [[ "${ITEMS[0]}" == "$TEST" ]]; then
+        echo $INDEX
+        return
+      fi
+      INDEX=$(($INDEX + 1))
+    else
+      for ITEM in "${ITEMS[@]}"; do
+        if [[ "$ITEM" == "$TEST" ]]; then
+          echo $INDEX
+          return
+        fi
+        INDEX=$(($INDEX + 1))
+      done
     fi
-    INDEX=$(($INDEX + 1))
-  done
-
-  echo ''
+  done <<< "$(echo -en "${!LIST_VAR}")"
 }
 
 list-get-item() {
   local LIST_VAR="${1}"
   local INDEX="${2}"
+  local SEP="${3:- }"
 
-  local LIST=(${!LIST_VAR})
-  echo ${LIST[$INDEX]}
+  local CURR_INDEX=0
+  local ITEMS
+  while IFS="$SEP" read -ra ITEMS; do
+    # The $'\n' construct to test for newline is not (as of test 2019-06-03) not
+    # necessary when sourcing the file and executing from the command line. But
+    # it is necessary for the test to pass. No idea what's happening. If
+    # someone figures it out, please note.
+    if [[ "$SEP" == $'\n' ]]; then
+      if (( $CURR_INDEX == $INDEX )) ; then
+        echo "${ITEMS[0]}"
+        return
+      fi
+      CURR_INDEX=$(($CURR_INDEX + 1))
+    else
+      echo "${ITEMS[$INDEX]}"
+    fi
+  done <<< "$(echo -en "${!LIST_VAR}")"
 }
