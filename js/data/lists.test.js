@@ -45,21 +45,21 @@ test("list-get-index should handle ';' seperator", () => {
 
 test('list-get-item should echo the item at the given index', () => {
   const result =
-    shell.exec(`source src/data/lists.func.sh; LIST='hey ho'; list-get-item LIST 1`, execOpts)
+    shell.exec(`set -e; source src/data/lists.func.sh; LIST='hey ho'; list-get-item LIST 1`, execOpts)
   const expectedOut = expect.stringMatching(/^ho\n$/)
   assertMatchNoError(result, expectedOut)
 })
 
 test('list-get-item should handle newline seperator', () => {
   const result =
-    shell.exec(`source src/data/lists.func.sh; LIST=$(echo -en "hey\nho"); list-get-item LIST 1 '\n'`, execOpts)
+    shell.exec(`set -e; source src/data/lists.func.sh; LIST=$(echo -en "hey\nho"); list-get-item LIST 1 '\n'`, execOpts)
   const expectedOut = expect.stringMatching(/^ho\n$/)
   assertMatchNoError(result, expectedOut)
 })
 
 test(`list-get-item should handle ';' seperator`, () => {
   const result =
-    shell.exec(`source src/data/lists.func.sh; LIST="hey;ho"; list-get-item LIST 1 ";"`, execOpts)
+    shell.exec(`set -e; source src/data/lists.func.sh; LIST="hey;ho"; list-get-item LIST 1 ";"`, execOpts)
   const expectedOut = expect.stringMatching(/^ho\n$/)
   assertMatchNoError(result, expectedOut)
 })
