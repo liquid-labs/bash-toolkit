@@ -1,3 +1,21 @@
+# You have two options when passing in the options to any of the select
+# functions. You can separate each item by space and use quotes, such as:
+#
+# selectOneCancel RESULT option1 "option with space"
+#
+# Or you can embed newlines in the option string, such as:
+#
+# OPTIONS="option1
+# option with space"
+# selectOneCancel RESULT "$OPTIONS"
+#
+# The second method can be combined with 'list-add-item' to safely build up
+# options (which may contain spaces) dynamically. The two methods cannot be
+# combined and the presece of a newline in any option will cause the input to
+# interepretted by the second method.
+
+import lists
+
 _commonSelectHelper() {
   # TODO: the '_' is to avoid collision, but is a bit hacky; in particular, some callers were using 'local OPTIONS'
   # TODO TODO: when declared local here, it should not change the caller... I tihnk the original analysis was flawed.
@@ -8,31 +26,31 @@ _commonSelectHelper() {
   local _SELECTION
   local _QUIT='false'
 
-  local _ENUM_OPTIONS=''
-  # This crazyness is to preserve quotes; we use '%' as IFS later
-  while (( $# > 0 )); do
-    local OPT="$1"; shift
-    local DEFAULT
-    # This is another quote preserving technique. We expect 'SELECT_DEFAULT'
-    # might be "'foo bar' 'baz'".
-    eval 'for DEFAULT in '${SELECT_DEFAULT:-}'; do
-      if [[ "$DEFAULT" == "$OPT" ]]; then
-        OPT="*${OPT}"
-      fi
-    done'
-    if [[ -z "$_ENUM_OPTIONS" ]]; then
-      _ENUM_OPTIONS="$OPT"
-    else
-      _ENUM_OPTIONS="$_ENUM_OPTIONS%$OPT"
-    fi
-  done
+  local _ENUM_OPTIONS
+  if [[ "$@" == *$'\n'* ]]; then
+    _ENUM_OPTIONS="$@"
+  else
+    while (( $# > 0 )); do
+      local OPT="$1"; shift
+      local DEFAULT
+      # This is another quote preserving technique. We expect 'SELECT_DEFAULT'
+      # might be "'foo bar' 'baz'".
+      eval 'for DEFAULT in '${SELECT_DEFAULT:-}'; do
+        if [[ "$DEFAULT" == "$OPT" ]]; then
+          OPT="*${OPT}"
+        fi
+      done'
+
+      list-add-item _ENUM_OPTIONS "$OPT" "\n"
+    done
+  fi
 
   local _OPTIONS="$_ENUM_OPTIONS"
   if [[ -n "$_PRE_OPTS" ]]; then
-    _OPTIONS="$(echo "$_PRE_OPTS" | tr ' ' '%')%$_OPTIONS"
+    _OPTIONS="$(echo "$_PRE_OPTS" | tr ' ' '\n')"$'\n'"$_OPTIONS"
   fi
   if [[ -n "$_POST_OPTS" ]]; then
-    _OPTIONS="$_OPTIONS%$(echo "$_POST_OPTS" | tr ' ' '%')"
+    _OPTIONS="$_OPTIONS"$'\n'"$(echo "$_POST_OPTS" | tr ' ' '\n')"
   fi
 
   updateVar() {
@@ -49,7 +67,7 @@ _commonSelectHelper() {
 
   while [[ $_QUIT == 'false' ]]; do
     local OLDIFS="$IFS"
-    IFS='%'
+    IFS=$'\n'
     select _SELECTION in $_OPTIONS; do
       case "$_SELECTION" in
         '<cancel>')
@@ -64,7 +82,7 @@ _commonSelectHelper() {
           eval $_VAR_NAME='any'
           _QUIT='true';;
         '<all>')
-          eval "$_VAR_NAME='$(echo $_ENUM_OPTIONS | tr '%' ' ')'"
+          eval "$_VAR_NAME='$(echo $_ENUM_OPTIONS | tr '\n' ' ')'"
           _QUIT='true';;
         '<default>')
           eval "${_VAR_NAME}=\"${SELECT_DEFAULT}\""
@@ -75,7 +93,7 @@ _commonSelectHelper() {
 
       # after first selection, 'default' is nullified
       SELECT_DEFAULT=''
-      _OPTIONS=$(echo "$_OPTIONS" | sed -Ee 's/(^|%)<default>(%|$)//' | tr -d '*')
+      _OPTIONS=$(echo "$_OPTIONS" | sed -Ee 's/(^|\n)<default>(\n|$)//' | tr -d '*')
 
       if [[ -n "$_SELECT_LIMIT" ]] && (( $_SELECT_LIMIT >= $_SELECTED_COUNT )); then
         _QUIT='true'
@@ -85,15 +103,19 @@ _commonSelectHelper() {
       else
         echo "Final selections: ${!_VAR_NAME}"
       fi
+      # remove the just selected option
       _OPTIONS=${_OPTIONS/$_SELECTION/}
-      _OPTIONS=${_OPTIONS//%%/%}
+      _OPTIONS=${_OPTIONS//$'\n'$'\n'/$'\n'}
+
       # if we only have the default options left, then we're done
-      _OPTIONS=`echo "$_OPTIONS" | sed -Ee 's/^(<done>)?%?(<cancel>)?%?(<all>)?%?(<any>)?%?(<default>)?%?(<other>)?$//'`
-      if [[ -z "$_OPTIONS" ]]; then
+      local EMPTY_TEST # sed inherently matches lines, not strings
+      EMPTY_TEST=`echo "$_OPTIONS" | sed -Ee 's/^(<done>)?\n?(<cancel>)?\n?(<all>)?\n?(<any>)?\n?(<default>)?\n?(<other>)?$//'`
+
+      if [[ -z "$EMPTY_TEST" ]]; then
         _QUIT='true'
       fi
       break
-    done
+    done # end select
     IFS="$OLDIFS"
   done
 }
