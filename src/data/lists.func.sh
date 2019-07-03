@@ -48,10 +48,10 @@ list-get-item() {
   local CURR_INDEX=0
   local ITEMS
   while IFS="$SEP" read -ra ITEMS; do
-    # The $'\n' construct to test for newline is not (as of test 2019-06-03) not
-    # necessary when sourcing the file and executing from the command line. But
-    # it is necessary for the test to pass. No idea what's happening. If
-    # someone figures it out, please note.
+    # The $'\n' construct to test for newline is not necessary (as of testing
+    # 2019-06-03) not when sourcing the file and executing from the command
+    # line. But it is necessary for the test to pass. No idea what's happening.
+    # If someone figures it out, please note.
     if [[ "$SEP" == $'\n' ]]; then
       if (( $CURR_INDEX == $INDEX )) ; then
         echo "${ITEMS[0]}"
