@@ -21,7 +21,7 @@ describe('rollup-bash', () => {
   test('rollup-bash will import standard functions', () => {
     shell.exec(`./dist/rollup-bash.sh ./data/files/test/import_basic.sh ./test-tmp/import_basic.sh`, execOpts)
     const result = shell.exec('./test-tmp/import_basic.sh', execOpts)
-    const expectedOut = expect.stringMatching(/^a\na b\n$/)
+    const expectedOut = expect.stringMatching(/^a\na\nb\n$/)
     assertMatchNoError(result, expectedOut)
   })
 
