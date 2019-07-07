@@ -23,35 +23,16 @@ _commonSelectHelper() {
   local _VAR_NAME="$1"; shift
   local _PRE_OPTS="$1"; shift
   local _POST_OPTS="$1"; shift
+  local _OPTIONS_LIST_NAME="$1"; shift
   local _SELECTION
   local _QUIT='false'
 
-  local _ENUM_OPTIONS
-  if [[ "$@" == *$'\n'* ]]; then
-    _ENUM_OPTIONS="$@"
-  else
-    while (( $# > 0 )); do
-      local OPT="$1"; shift
-      local DEFAULT
-      # This is another quote preserving technique. We expect 'SELECT_DEFAULT'
-      # might be "'foo bar' 'baz'".
-      eval 'for DEFAULT in '${SELECT_DEFAULT:-}'; do
-        if [[ "$DEFAULT" == "$OPT" ]]; then
-          OPT="*${OPT}"
-        fi
-      done'
-
-      list-add-item _ENUM_OPTIONS "$OPT" "\n"
-    done
-  fi
-
-  local _OPTIONS="$_ENUM_OPTIONS"
+  local _OPTIONS="${!_OPTIONS_LIST_NAME:-}"
+  # TODO: would be nice to have a 'prepend-' or 'unshift-' items.
   if [[ -n "$_PRE_OPTS" ]]; then
-    _OPTIONS="$(echo "$_PRE_OPTS" | tr ' ' '\n')"$'\n'"$_OPTIONS"
+    _OPTIONS="$_PRE_OPTS"$'\n'"$_OPTIONS"
   fi
-  if [[ -n "$_POST_OPTS" ]]; then
-    _OPTIONS="$_OPTIONS"$'\n'"$(echo "$_POST_OPTS" | tr ' ' '\n')"
-  fi
+  list-add-item _OPTIONS $_POST_OPTS
 
   updateVar() {
     _SELECTION="$(echo "$_SELECTION" | sed -Ee 's/^\*//')"
@@ -71,7 +52,7 @@ _commonSelectHelper() {
     select _SELECTION in $_OPTIONS; do
       case "$_SELECTION" in
         '<cancel>')
-          exit;;
+          return;;
         '<done>')
           _QUIT='true';;
         '<other>')
@@ -82,7 +63,7 @@ _commonSelectHelper() {
           eval $_VAR_NAME='any'
           _QUIT='true';;
         '<all>')
-          eval "$_VAR_NAME='$(echo $_ENUM_OPTIONS | tr '\n' ' ')'"
+          eval $_VAR_NAME='"$_ENUM_OPTIONS"'
           _QUIT='true';;
         '<default>')
           eval "${_VAR_NAME}=\"${SELECT_DEFAULT}\""
@@ -98,10 +79,11 @@ _commonSelectHelper() {
       if [[ -n "$_SELECT_LIMIT" ]] && (( $_SELECT_LIMIT >= $_SELECTED_COUNT )); then
         _QUIT='true'
       fi
+      # Our user feedback should go to stderr just like the user prompts from select
       if [[ "$_QUIT" != 'true' ]]; then
-        echo "Current selections: ${!_VAR_NAME}"
+        echo "Current selections: ${!_VAR_NAME}" >&2
       else
-        echo "Final selections: ${!_VAR_NAME}"
+        echo "Final selections: ${!_VAR_NAME}" >&2
       fi
       # remove the just selected option
       _OPTIONS=${_OPTIONS/$_SELECTION/}
@@ -121,8 +103,7 @@ _commonSelectHelper() {
 }
 
 selectOneCancel() {
-  local VAR_NAME="$1"; shift
-  _commonSelectHelper 1 "$VAR_NAME" '<cancel>' '' "$@"
+  _commonSelectHelper 1 "$1" '<cancel>' '' "$2"
 }
 
 selectOneCancelDefault() {
@@ -147,22 +128,22 @@ selectCancel() {
 
 selectDoneCancel() {
   local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done> <cancel>' '' "$@"
+  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '' "$@"
 }
 
 selectDoneCancelAllOther() {
   local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done> <cancel>' '<all> <other>' "$@"
+  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<all>'$'\n''<other>' "$@"
 }
 
 selectDoneCancelAnyOther() {
   local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done> <cancel>' '<any> <other>' "$@"
+  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<any>'$'\n''<other>' "$@"
 }
 
 selectDoneCancelOther() {
   local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done> <cancel>' '<other>' "$@"
+  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<other>' "$@"
 }
 
 selectDoneCancelOtherDefault() {
@@ -171,11 +152,11 @@ selectDoneCancelOtherDefault() {
     echowarn "Requested 'default' select, but no default provided. Falling back to non-default selection."
     selectDoneCancelOther "$VAR_NAME" "$@"
   else
-    _commonSelectHelper '' "$VAR_NAME" '<done> <cancel>' '<other> <default>' "$@"
+    _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<other>'$'\n''<default>' "$@"
   fi
 }
 
 selectDoneCancelAll() {
   local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done> <cancel>' '<all>' "$@"
+  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<all>' "$@"
 }
