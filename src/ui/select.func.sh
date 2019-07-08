@@ -107,12 +107,11 @@ selectOneCancel() {
 }
 
 selectOneCancelDefault() {
-  local VAR_NAME="$1"; shift
   if [[ -z "$SELECT_DEFAULT" ]]; then
     echowarn "Requested 'default' select, but no default provided. Falling back to non-default selection."
-    selectOneCancel "$VAR_NAME" "$@"
+    selectOneCancel "$1" "$2"
   else
-    _commonSelectHelper 1 "$VAR_NAME" '<cancel>' '<default>' "$@"
+    _commonSelectHelper 1 "$1" '<cancel>' '<default>' "$2"
   fi
 }
 
