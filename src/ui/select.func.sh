@@ -116,41 +116,34 @@ selectOneCancelDefault() {
 }
 
 selectOneCancelOther() {
-  local VAR_NAME="$1"; shift
-  _commonSelectHelper 1 "$VAR_NAME" '<cancel>' '<other>' "$@"
+  _commonSelectHelper 1 "$1" '<cancel>' '<other>' "$2"
 }
 
 selectDoneCancel() {
-  local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '' "$@"
-}
-
-selectDoneCancelAllOther() {
-  local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<all>'$'\n''<other>' "$@"
-}
-
-selectDoneCancelAnyOther() {
-  local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<any>'$'\n''<other>' "$@"
+  _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '' "$2"
 }
 
 selectDoneCancelOther() {
-  local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<other>' "$@"
+  _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<other>' "$2"
+}
+
+selectDoneCancelAllOther() {
+  _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<all>'$'\n''<other>' "$2"
+}
+
+selectDoneCancelAnyOther() {
+  _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<any>'$'\n''<other>' "$2"
 }
 
 selectDoneCancelOtherDefault() {
-  local VAR_NAME="$1"; shift
   if [[ -z "$SELECT_DEFAULT" ]]; then
     echowarn "Requested 'default' select, but no default provided. Falling back to non-default selection."
-    selectDoneCancelOther "$VAR_NAME" "$@"
+    selectDoneCancelOther "$1" "$2"
   else
-    _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<other>'$'\n''<default>' "$@"
+    _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<other>'$'\n''<default>' "$2"
   fi
 }
 
 selectDoneCancelAll() {
-  local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '<all>' "$@"
+  _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<all>' "$2"
 }
