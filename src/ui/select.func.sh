@@ -120,11 +120,6 @@ selectOneCancelOther() {
   _commonSelectHelper 1 "$VAR_NAME" '<cancel>' '<other>' "$@"
 }
 
-selectCancel() {
-  local VAR_NAME="$1"; shift
-  _commonSelectHelper '' "$VAR_NAME" '<cancel>' '' "$@"
-}
-
 selectDoneCancel() {
   local VAR_NAME="$1"; shift
   _commonSelectHelper '' "$VAR_NAME" '<done>'$'\n''<cancel>' '' "$@"
