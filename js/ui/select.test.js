@@ -23,6 +23,7 @@ ${`selectOneCancelDefault`} | ${`2`} | ${'option a'}
 ${`selectOneCancelDefault`} | ${`3`} | ${'option b'}
 ${`selectOneCancelOther`} | ${`2`} | ${'option a'}
 ${`selectOneCancelOther`} | ${`3`} | ${'option b'}
+${`selectOneCancelNew`} | ${`2`} | ${'option a'}
 `(`one-choice '$funcName'-> $choice should set RESULT to selection`, ({funcName, choice, selection}) => {
   const result = shell.exec(testString(funcName, choice), execOpts)
   const expectedOut = expect.stringMatching(selection)
@@ -35,12 +36,20 @@ ${`selectDoneCancel`} | ${`3`} | ${'option a'}
 ${`selectDoneCancel`} | ${`4`} | ${'option b'}
 ${`selectDoneCancelOther`} | ${`3`} | ${'option a'}
 ${`selectDoneCancelOther`} | ${`4`} | ${'option b'}
+${`selectDoneCancelNew`} | ${`3`} | ${'option a'}
+${`selectDoneCancelNew`} | ${`4`} | ${'option b'}
 ${`selectDoneCancelAllOther`} | ${`3`} | ${'option a'}
 ${`selectDoneCancelAllOther`} | ${`4`} | ${'option b'}
+${`selectDoneCancelAllNew`} | ${`3`} | ${'option a'}
+${`selectDoneCancelAllNew`} | ${`4`} | ${'option b'}
 ${`selectDoneCancelAnyOther`} | ${`3`} | ${'option a'}
 ${`selectDoneCancelAnyOther`} | ${`4`} | ${'option b'}
+${`selectDoneCancelAnyNew`} | ${`3`} | ${'option a'}
+${`selectDoneCancelAnyNew`} | ${`4`} | ${'option b'}
 ${`selectDoneCancelOtherDefault`} | ${`3`} | ${'option a'}
 ${`selectDoneCancelOtherDefault`} | ${`4`} | ${'option b'}
+${`selectDoneCancelNewDefault`} | ${`3`} | ${'option a'}
+${`selectDoneCancelNewDefault`} | ${`4`} | ${'option b'}
 ${`selectDoneCancelAll`} | ${`3`} | ${'option a'}
 ${`selectDoneCancelAll`} | ${`4`} | ${'option b'}
 `(`multi-choice '$funcName'-> $choice -> 'done' should set RESULT to selection`, ({funcName, choice, selection}) => {

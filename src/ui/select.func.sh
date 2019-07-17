@@ -49,15 +49,16 @@ _commonSelectHelper() {
   while [[ $_QUIT == 'false' ]]; do
     local OLDIFS="$IFS"
     IFS=$'\n'
+    echo >&2
     select _SELECTION in $_OPTIONS; do
       case "$_SELECTION" in
         '<cancel>')
           return;;
         '<done>')
           _QUIT='true';;
-        '<other>')
+        '<other>'|'<new>')
           _SELECTION=''
-          requireAnswer "$PS3" _SELECTION "$_DEFAULT"
+          require-answer "$PS3" _SELECTION "$_DEFAULT"
           updateVar;;
         '<any>')
           eval $_VAR_NAME='any'
@@ -83,7 +84,7 @@ _commonSelectHelper() {
       if [[ "$_QUIT" != 'true' ]]; then
         echo "Current selections: ${!_VAR_NAME}" >&2
       else
-        echo "Final selections: ${!_VAR_NAME}" >&2
+        echo -e "Final selections: ${!_VAR_NAME}" >&2
       fi
       # remove the just selected option
       _OPTIONS=${_OPTIONS/$_SELECTION/}
@@ -91,7 +92,7 @@ _commonSelectHelper() {
 
       # if we only have the default options left, then we're done
       local EMPTY_TEST # sed inherently matches lines, not strings
-      EMPTY_TEST=`echo "$_OPTIONS" | sed -Ee 's/^(<done>)?\n?(<cancel>)?\n?(<all>)?\n?(<any>)?\n?(<default>)?\n?(<other>)?$//'`
+      EMPTY_TEST=`echo "$_OPTIONS" | sed -Ee 's/^(<done>)?\n?(<cancel>)?\n?(<all>)?\n?(<any>)?\n?(<default>)?\n?(<other>)?\n?(<new>)?$//'`
 
       if [[ -z "$EMPTY_TEST" ]]; then
         _QUIT='true'
@@ -119,6 +120,10 @@ selectOneCancelOther() {
   _commonSelectHelper 1 "$1" '<cancel>' '<other>' "$2"
 }
 
+selectOneCancelNew() {
+  _commonSelectHelper 1 "$1" '<cancel>' '<new>' "$2"
+}
+
 selectDoneCancel() {
   _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '' "$2"
 }
@@ -127,12 +132,24 @@ selectDoneCancelOther() {
   _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<other>' "$2"
 }
 
+selectDoneCancelNew() {
+  _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<new>' "$2"
+}
+
 selectDoneCancelAllOther() {
   _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<all>'$'\n''<other>' "$2"
 }
 
+selectDoneCancelAllNew() {
+  _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<all>'$'\n''<new>' "$2"
+}
+
 selectDoneCancelAnyOther() {
   _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<any>'$'\n''<other>' "$2"
+}
+
+selectDoneCancelAnyNew() {
+  _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<any>'$'\n''<new>' "$2"
 }
 
 selectDoneCancelOtherDefault() {
@@ -141,6 +158,15 @@ selectDoneCancelOtherDefault() {
     selectDoneCancelOther "$1" "$2"
   else
     _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<other>'$'\n''<default>' "$2"
+  fi
+}
+
+selectDoneCancelNewDefault() {
+  if [[ -z "$SELECT_DEFAULT" ]]; then
+    echowarn "Requested 'default' select, but no default provided. Falling back to non-default selection."
+    selectDoneCancelOther "$1" "$2"
+  else
+    _commonSelectHelper '' "$1" '<done>'$'\n''<cancel>' '<new>'$'\n''<default>' "$2"
   fi
 }
 
