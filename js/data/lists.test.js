@@ -15,6 +15,13 @@ test('list-add-item should handle spaces within items', () => {
   assertMatchNoError(result, expectedOut)
 })
 
+test('list-add-item should be unchanged if the add var is empty (empty list)', () => {
+  const result =
+    shell.exec(`set -e; source src/data/lists.func.sh; LIST=''; list-add-item LIST "$NEW_ITEM"; echo -e "$LIST"`, execOpts)
+  const expectedOut = expect.stringMatching(/^\n$/)
+  assertMatchNoError(result, expectedOut)
+})
+
 test('list-get-index should echo index of item if present', () => {
   const result =
     shell.exec(`set -e; source src/data/lists.func.sh; LIST=hey$'\n'ho; list-get-index LIST ho`, execOpts)

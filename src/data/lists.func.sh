@@ -1,7 +1,8 @@
 list-add-item() {
   local LIST_VAR="${1}"; shift
   while (( $# > 0 )); do
-    local ITEM="${1}"; shift
+    local ITEM
+    ITEM="${1}"; shift
     # TODO: test that the ITEM does not contain newlines; error or replace
 
     if [[ -n "$ITEM" ]]; then
