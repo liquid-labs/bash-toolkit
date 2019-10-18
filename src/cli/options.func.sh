@@ -1,10 +1,25 @@
+if [[ $(uname) == 'Darwin' ]]; then
+  GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
+else
+  GNU_GETOPT="$(which getopt)"
+fi
+
 # Usage:
 #   local TMP
 #   TMP=$(setSimpleOptions SHORT LONG= SPECIFY_SHORT:X LONG_SPEC:S= -- "$@") \
 #     || ( contextHelp; echoerrandexit "Bad options."; )
 #   eval "$TMP"
+#
+# Note the use of the intermediate TMP is important to preserve the exit value
+# setSimpleOptions. E.g., doing 'eval "$(setSimpleOptions ...)"' will work fine,
+# but because the last statement is the eval of the results, and not the function
+# call itself, the return of setSimpleOptions gets lost.
+#
+# Instead, it's generally recommended to be strict, 'set -e', and use the TMP-form.
 setSimpleOptions() {
-  local VAR_SPEC SHORT_OPTS LONG_OPTS LOCAL_DECLS
+  local VAR_SPEC LOCAL_DECLS
+  local LONG_OPTS=""
+  local SHORT_OPTS=""
   local OPTS_COUNT=0
   # This looks like a straight up bug in bash, but the left-paren in '--)' was
   # matching the '$(' and causing a syntax error. So we use ']' and replace it
@@ -32,9 +47,9 @@ EOF
     LONG_OPT="$(echo "${LOWER_NAME}" | tr '_' '-')"
 
     SHORT_OPTS="${SHORT_OPTS:-}${SHORT_OPT}${OPT_REQ}"
-    #LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS}${OPT_REQ},") || true && echo -n "${LONG_OPT}${OPT_REQ}")
-    LONG_OPTS="${LONG_OPTS:-}${LONG_OPT}${OPT_REQ}"
-    # set on declaration so nested calles get reset
+
+    LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS}${OPT_REQ},") || true && echo -n "${LONG_OPT}${OPT_REQ}")
+
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
     local VAR_SETTER="echo \"${VAR_NAME}=true;\""
     if [[ -n "$OPT_REQ" ]]; then
@@ -60,8 +75,8 @@ EOF
   echo "$LOCAL_DECLS"
 
   local TMP # see https://unix.stackexchange.com/a/88338/84520
-  TMP=`${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "$@"` \
-    || exit 1
+  TMP=$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "$@") \
+    || return $?
   eval set -- "$TMP"
   while true; do
     eval "$CASE_HANDLER"
@@ -71,5 +86,5 @@ EOF
 
   echo "local _OPTS_COUNT=${OPTS_COUNT};"
   echo "set -- \"$@\""
-  echo 'if [[ -z "$1" ]]; then shift; fi'
+  echo 'if [[ -z "$1" ]]; then shift; fi' # TODO: explain this
 }
