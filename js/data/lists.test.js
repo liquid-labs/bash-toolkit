@@ -22,6 +22,29 @@ test('list-add-item should be unchanged if the add var is empty (empty list)', (
   assertMatchNoError(result, expectedOut)
 })
 
+describe('list-rm-item', () => {
+  test('properly removes a single item at the head of a list', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=hey$'\n'ho; list-rm-item LIST 'hey'; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^ho\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('properly removes a single item at the end of a list', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=hey$'\n'ho; list-rm-item LIST 'ho'; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^hey\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('properly removes a single item in the middle of a list', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'bar'\n'baz; list-rm-item LIST 'bar'; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbaz\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+})
+
 test('list-get-index should echo index of item if present', () => {
   const result =
     shell.exec(`set -e; source src/data/lists.func.sh; LIST=hey$'\n'ho; list-get-index LIST ho`, execOpts)
