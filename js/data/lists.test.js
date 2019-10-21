@@ -55,6 +55,14 @@ describe('list-rm-item', () => {
   char | desc| testEntry
   ${`@`} | ${`in the middle`} | ${`foo@bar`}
   ${`@`} | ${`at front`} | ${`@foobar`}
+  ${`/`} | ${`in the middle`} | ${`foo/bar`}
+  ${`/`} | ${`at front`} | ${`/foobar`}
+  ${`#`} | ${`in the middle`} | ${`foo#bar`}
+  ${`#`} | ${`at front`} | ${`#foobar`}
+  ${`.`} | ${`in the middle`} | ${`.ar`}
+  ${`.`} | ${`at front`} | ${`b.r`}
+  ${`[`} | ${`in the middle`} | ${`b[a]r`}
+  ${`[`} | ${`at front`} | ${`[f]oo`}
   `(`deals with special character '$char' $desc`, ({testEntry}) => {
     const result =
       shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'"${testEntry}"$'\n'bar; list-rm-item LIST "${testEntry}"; echo "$LIST"`, execOpts)
