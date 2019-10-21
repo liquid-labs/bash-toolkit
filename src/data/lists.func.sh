@@ -21,11 +21,7 @@ list-rm-item() {
   while (( $# > 0 )); do
     local ITEM NEW_ITEMS
     ITEM="${1}"; shift
-    # echo "LIST: ${!LIST_VAR}" >&2
-    # echo "ITEM: $ITEM" >&2
-    NEW_ITEMS="$(echo "${!LIST_VAR}" | sed -Ee "/^$ITEM\$/d")"
-    # echo eval "$LIST_VAR=\"$NEW_ITEMS\""
-    # echo eval $LIST_VAR="$NEW_ITEMS"
+    NEW_ITEMS="$(echo "${!LIST_VAR}" | sed -e "/^$ITEM\$/d")"
     eval $LIST_VAR='"'"$NEW_ITEMS"'"'
   done
 }

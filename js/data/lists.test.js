@@ -43,6 +43,24 @@ describe('list-rm-item', () => {
     const expectedOut = expect.stringMatching(/^foo\nbaz\n$/)
     assertMatchNoError(result, expectedOut)
   })
+
+  test('properly final item in a list', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=hey; list-rm-item LIST 'hey'; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test.each`
+  char | desc| testEntry
+  ${`@`} | ${`in the middle`} | ${`foo@bar`}
+  ${`@`} | ${`at front`} | ${`@foobar`}
+  `(`deals with special character '$char' $desc`, ({testEntry}) => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'"${testEntry}"$'\n'bar; list-rm-item LIST "${testEntry}"; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
 })
 
 test('list-get-index should echo index of item if present', () => {
