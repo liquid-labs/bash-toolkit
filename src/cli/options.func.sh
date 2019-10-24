@@ -30,6 +30,9 @@ setSimpleOptions() {
 EOF
 )
   while true; do
+    if (( $# == 0 )); then
+      echoerrandexit "setSimpleOptions: No argument to process; did you forget to include the '--' marker?"
+    fi
     VAR_SPEC="$1"; shift
     local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT
     if [[ "$VAR_SPEC" == '--' ]]; then
@@ -48,7 +51,7 @@ EOF
 
     SHORT_OPTS="${SHORT_OPTS:-}${SHORT_OPT}${OPT_REQ}"
 
-    LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS}${OPT_REQ},") || true && echo -n "${LONG_OPT}${OPT_REQ}")
+    LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_REQ}")
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
     local VAR_SETTER="echo \"${VAR_NAME}=true;\""
@@ -63,7 +66,7 @@ EOF
         OPTS_COUNT=\$(( \$OPTS_COUNT + 1));;
 EOF
 )
-  done
+  done # main while loop
   CASE_HANDLER=$(cat <<EOF
     case "\$1" in
       $CASE_HANDLER

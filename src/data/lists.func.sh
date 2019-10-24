@@ -60,3 +60,32 @@ list-get-item() {
     CURR_INDEX=$(($CURR_INDEX + 1))
   done <<< "${!LIST_VAR}"
 }
+
+list-replace-by-string() {
+  local LIST_VAR="${1}"
+  local TEST_ITEM="${2}"
+  local NEW_ITEM="${3}"
+
+  local ITEM INDEX NEW_LIST
+  INDEX=0
+  for ITEM in ${!LIST_VAR}; do
+    if [[ "$(list-get-item $LIST_VAR $INDEX)" == "$TEST_ITEM" ]]; then
+      list-add-item NEW_LIST "$NEW_ITEM"
+    else
+      list-add-item NEW_LIST "$ITEM"
+    fi
+    INDEX=$(($INDEX + 1))
+  done
+  eval $LIST_VAR='"'"$NEW_LIST"'"'
+}
+
+list-from-csv() {
+  local LIST_VAR="${1}"
+  local CSV="${2}"
+
+  while IFS=',' read -ra ADDR; do
+    for i in "${ADDR[@]}"; do
+      list-add-item "$LIST_VAR" "$i"
+    done
+  done <<< "$CSV"
+}

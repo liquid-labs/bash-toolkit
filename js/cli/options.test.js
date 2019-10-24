@@ -71,4 +71,26 @@ describe('setSimpleOptions', () => {
       expect(result.code).toBe(1)
     })
   })
+
+  describe('required value', () => {
+    test(`sets incoming value with long form 'opt=foo'`, () => {
+      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { local TMP; TMP=$(setSimpleOptions OPT= -- "$@"); eval "$TMP"; echo "OPT: $OPT"; }; f --opt=foo`, execOpts)
+      const expectedOut = expect.stringMatching(/^OPT: foo\n$/)
+      assertMatchNoError(result, expectedOut)
+    })
+
+    test(`results in error when no required value provided`, () => {
+      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { local TMP; TMP=$(setSimpleOptions OPT= -- "$@"); eval "$TMP"; echo "OPT: $OPT"; }; f --opt`, execOpts)
+      const expectedErr = expect.stringMatching(/requires an argument\s*$/)
+      expect(result.stderr).toEqual(expectedErr)
+      expect(result.stdout).toEqual('')
+      expect(result.code).toBe(1)
+    })
+
+    test(`supports mixed required and value-less options`, () => {
+      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { local TMP; TMP=$(setSimpleOptions NOVAL OPT= -- "$@"); eval "$TMP"; echo "NOVAL: $NOVAL"; echo "OPT: $OPT"; }; f --noval; f --opt=foo; f --noval --opt=bar`, execOpts)
+      const expectedOut = expect.stringMatching(/^NOVAL: true\nOPT: \nNOVAL: \nOPT: foo\nNOVAL: true\nOPT: bar\n$/)
+      assertMatchNoError(result, expectedOut)
+    })
+  })
 })
