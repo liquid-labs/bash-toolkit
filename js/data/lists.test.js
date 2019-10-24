@@ -1,25 +1,34 @@
 /* global test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
-test('list-add-item should append items', () => {
-  const result =
-    shell.exec(`set -e; source src/data/lists.func.sh; LIST=''; list-add-item LIST a; echo "1: $LIST"; list-add-item LIST b; echo -n "2: $LIST"`, execOpts)
-  const expectedOut = expect.stringMatching(/^1: a\n2: a\nb$/)
-  assertMatchNoError(result, expectedOut)
-})
+describe('list-add-item', () => {
+  test('should append items', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=''; list-add-item LIST a; echo "1: $LIST"; list-add-item LIST b; echo -n "2: $LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^1: a\n2: a\nb$/)
+    assertMatchNoError(result, expectedOut)
+  })
 
-test('list-add-item should handle spaces within items', () => {
-  const result =
-    shell.exec(`set -e; source src/data/lists.func.sh; LIST=''; list-add-item LIST 'a b'; echo -e "$LIST"; list-add-item LIST 'c d'; echo -en "$LIST"`, execOpts)
-  const expectedOut = expect.stringMatching(/^a b\na b\nc d$/)
-  assertMatchNoError(result, expectedOut)
-})
+  test('should handle spaces within items', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=''; list-add-item LIST 'a b'; echo -e "$LIST"; list-add-item LIST 'c d'; echo -en "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^a b\na b\nc d$/)
+    assertMatchNoError(result, expectedOut)
+  })
 
-test('list-add-item should be unchanged if the add var is empty (empty list)', () => {
-  const result =
-    shell.exec(`set -e; source src/data/lists.func.sh; LIST=''; list-add-item LIST "$NEW_ITEM"; echo -e "$LIST"`, execOpts)
-  const expectedOut = expect.stringMatching(/^\n$/)
-  assertMatchNoError(result, expectedOut)
+  test('should be unchanged if the add var is empty (empty list)', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=''; list-add-item LIST "$NEW_ITEM"; echo -e "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test(`should build a string usable by 'for'`, () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; list-add-item LIST foo; list-add-item LIST bar; for i in $LIST; do echo $i; done`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
 })
 
 describe('list-rm-item', () => {
