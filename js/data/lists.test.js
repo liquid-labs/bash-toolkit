@@ -80,6 +80,22 @@ describe('list-rm-item', () => {
   })
 })
 
+describe('list-replace-by-string', () => {
+  test('should replace every instance in a list', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'bar$'\n'foo; list-replace-by-string LIST foo baz; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^baz\nbar\nbaz\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('should not relpace sub-string matches', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'bar$'\n'foo; list-replace-by-string LIST oo baz; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\nfoo\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+})
+
 describe('list-from-csv', () =>{
   test('should create a good list from one item', () => {
     const result =
