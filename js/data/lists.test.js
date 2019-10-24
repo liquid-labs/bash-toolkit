@@ -71,6 +71,22 @@ describe('list-rm-item', () => {
   })
 })
 
+describe('list-from-csv', () =>{
+  test('should create a good list from one item', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; list-from-csv LIST foo; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('should create a good list from multiple items', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; list-from-csv LIST foo,bar; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+})
+
 test('list-get-index should echo index of item if present', () => {
   const result =
     shell.exec(`set -e; source src/data/lists.func.sh; LIST=hey$'\n'ho; list-get-index LIST ho`, execOpts)

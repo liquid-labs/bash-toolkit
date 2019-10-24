@@ -60,3 +60,14 @@ list-get-item() {
     CURR_INDEX=$(($CURR_INDEX + 1))
   done <<< "${!LIST_VAR}"
 }
+
+list-from-csv() {
+  local LIST_VAR="${1}"
+  local CSV="${2}"
+
+  while IFS=',' read -ra ADDR; do
+    for i in "${ADDR[@]}"; do
+      list-add-item "$LIST_VAR" "$i"
+    done
+  done <<< "$CSV"
+}
