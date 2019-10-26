@@ -21,9 +21,9 @@ setSimpleOptions() {
   local LONG_OPTS=""
   local SHORT_OPTS=""
   local OPTS_COUNT=0
-  # This looks like a straight up bug in bash, but the left-paren in '--)' was
-  # matching the '$(' and causing a syntax error. So we use ']' and replace it
-  # later.
+  # Bash Bug? This looks like a straight up bug in bash, but the left-paren in
+  # '--)' was matching the '$(' and causing a syntax error. So we use ']' and
+  # replace it later.
   local CASE_HANDLER=$(cat <<EOF
     --]
       break;;
@@ -57,7 +57,7 @@ EOF
     local VAR_SETTER="echo \"${VAR_NAME}=true;\""
     if [[ -n "$OPT_REQ" ]]; then
       LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
-      VAR_SETTER="echo \"${VAR_NAME}='\$2'; ${VAR_NAME}_SET=true;\"; shift;"
+      VAR_SETTER="echo \"${VAR_NAME}='\"\${2//\\'/\\'\\\"\\'\\\"\\'}\"'; ${VAR_NAME}_SET=true;\"; shift;"
     fi
     CASE_HANDLER=$(cat <<EOF
     ${CASE_HANDLER}
@@ -73,7 +73,8 @@ EOF
     esac
 EOF
 )
-  CASE_HANDLER=`echo "$CASE_HANDLER" | tr ']' ')'`
+  # replace the ']'; see 'Bash Bug?' above
+  CASE_HANDLER=$(echo "$CASE_HANDLER" | perl -pe 's/\]$/)/')
 
   echo "$LOCAL_DECLS"
 

@@ -92,5 +92,11 @@ describe('setSimpleOptions', () => {
       const expectedOut = expect.stringMatching(/^NOVAL: true\nOPT: \nNOVAL: \nOPT: foo\nNOVAL: true\nOPT: bar\n$/)
       assertMatchNoError(result, expectedOut)
     })
+
+    test.each(["'",']'])(`properly escapse special char: %s`, (c) => {
+      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { local TMP; TMP=$(setSimpleOptions OPT= -- "$@"); eval "$TMP"; echo "OPT: $OPT"; }; f --opt="foo${c}bar"`, execOpts)
+      const expectedOut = expect.stringMatching(new RegExp(`^OPT: foo${c}bar\n`))// /^OPT: foo'bar\n$/)
+      assertMatchNoError(result, expectedOut)
+    })
   })
 })
