@@ -16,6 +16,18 @@ list-add-item() {
   done
 }
 
+list-add-uniq() {
+  local LIST_VAR="${1}"; shift
+  while (( $# > 0 )); do
+    local ITEM
+    ITEM="${1}"; shift
+    # TODO: enforce no newlines in item
+    if [[ -z $(list-get-index $LIST_VAR "$ITEM") ]]; then
+      list-add-item $LIST_VAR "$ITEM"
+    fi
+  done
+}
+
 list-rm-item() {
   local LIST_VAR="${1}"; shift
   while (( $# > 0 )); do
