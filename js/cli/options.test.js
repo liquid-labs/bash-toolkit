@@ -3,11 +3,17 @@ import { assertMatchNoError, shell, execOpts } from '../testlib'
 const testFuncSimple2Opts = `set -e
 source src/cli/options.func.sh
 function f() {
-  local TMP
-  TMP=$(setSimpleOptions AOPT BOPT -- "$@")
-  eval "$TMP"
+  eval "$(setSimpleOptions AOPT BOPT -- "$@")"
   echo "AOPT: $AOPT"
   echo "BOPT: $BOPT"
+}`
+
+const testFuncPositionals = `set -e
+source src/cli/options.func.sh
+function f() {
+  eval "$(setSimpleOptions AOPT BOPT -- "$@")"
+  echo "1: $1"
+  echo "2: $2"
 }`
 
 describe('setSimpleOptions', () => {
@@ -41,13 +47,23 @@ describe('setSimpleOptions', () => {
     assertMatchNoError(result, expectedOut)
   })
 
+  test('will properly set quoted positional options', () => {
+    const result = shell.exec(`${testFuncPositionals}; f "foo bar" baz`, execOpts)
+    const expectedOut = expect.stringMatching(/^1: foo bar\n2: baz\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('will properly set quoted positional options with options', () => {
+    const result = shell.exec(`${testFuncPositionals}; f -a "foo bar" baz`, execOpts)
+    const expectedOut = expect.stringMatching(/^1: foo bar\n2: baz\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
   describe('short option renaming', () => {
     const testShortRename = `set -e
     source src/cli/options.func.sh
     function f() {
-      local TMP
-      TMP=$(setSimpleOptions AOPT:B -- "$@")
-      eval "$TMP"
+      eval "$(setSimpleOptions AOPT:B -- "$@")"
       echo "AOPT: $AOPT"
     }`
 
@@ -74,13 +90,13 @@ describe('setSimpleOptions', () => {
 
   describe('required value', () => {
     test(`sets incoming value with long form 'opt=foo'`, () => {
-      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { local TMP; TMP=$(setSimpleOptions OPT= -- "$@"); eval "$TMP"; echo "OPT: $OPT"; }; f --opt=foo`, execOpts)
+      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "OPT: $OPT"; }; f --opt=foo`, execOpts)
       const expectedOut = expect.stringMatching(/^OPT: foo\n$/)
       assertMatchNoError(result, expectedOut)
     })
 
     test(`results in error when no required value provided`, () => {
-      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { local TMP; TMP=$(setSimpleOptions OPT= -- "$@"); eval "$TMP"; echo "OPT: $OPT"; }; f --opt`, execOpts)
+      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "OPT: $OPT"; }; f --opt`, execOpts)
       const expectedErr = expect.stringMatching(/requires an argument\s*$/)
       expect(result.stderr).toEqual(expectedErr)
       expect(result.stdout).toEqual('')
@@ -88,13 +104,13 @@ describe('setSimpleOptions', () => {
     })
 
     test(`supports mixed required and value-less options`, () => {
-      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { local TMP; TMP=$(setSimpleOptions NOVAL OPT= -- "$@"); eval "$TMP"; echo "NOVAL: $NOVAL"; echo "OPT: $OPT"; }; f --noval; f --opt=foo; f --noval --opt=bar`, execOpts)
+      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { eval "$(setSimpleOptions NOVAL OPT= -- "$@")"; echo "NOVAL: $NOVAL"; echo "OPT: $OPT"; }; f --noval; f --opt=foo; f --noval --opt=bar`, execOpts)
       const expectedOut = expect.stringMatching(/^NOVAL: true\nOPT: \nNOVAL: \nOPT: foo\nNOVAL: true\nOPT: bar\n$/)
       assertMatchNoError(result, expectedOut)
     })
 
     test.each(["'",']'])(`properly escapse special char: %s`, (c) => {
-      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { local TMP; TMP=$(setSimpleOptions OPT= -- "$@"); eval "$TMP"; echo "OPT: $OPT"; }; f --opt="foo${c}bar"`, execOpts)
+      const result = shell.exec(`set -e; source src/cli/options.func.sh; f() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "OPT: $OPT"; }; f --opt="foo${c}bar"`, execOpts)
       const expectedOut = expect.stringMatching(new RegExp(`^OPT: foo${c}bar\n`))// /^OPT: foo'bar\n$/)
       assertMatchNoError(result, expectedOut)
     })

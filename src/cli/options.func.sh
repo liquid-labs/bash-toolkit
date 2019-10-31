@@ -54,10 +54,10 @@ EOF
     LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_REQ}")
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
-    local VAR_SETTER="echo \"${VAR_NAME}=true;\""
+    local VAR_SETTER="${VAR_NAME}=true;"
     if [[ -n "$OPT_REQ" ]]; then
       LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
-      VAR_SETTER="echo \"${VAR_NAME}='\"\${2//\\'/\\'\\\"\\'\\\"\\'}\"'; ${VAR_NAME}_SET=true;\"; shift;"
+      VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
     fi
     CASE_HANDLER=$(cat <<EOF
     ${CASE_HANDLER}
@@ -78,17 +78,31 @@ EOF
 
   echo "$LOCAL_DECLS"
 
-  local TMP # see https://unix.stackexchange.com/a/88338/84520
-  TMP=$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "$@") \
-    || return $?
-  eval set -- "$TMP"
-  while true; do
-    eval "$CASE_HANDLER"
-    shift
-  done
+  cat <<EOF >> log.tmp
+local TMP # see https://unix.stackexchange.com/a/88338/84520
+TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
+  || exit \$?
+eval set -- "\$TMP"
+while true; do
+  $CASE_HANDLER
   shift
+done
+shift
 
-  echo "local _OPTS_COUNT=${OPTS_COUNT};"
-  echo "set -- \"$@\""
-  echo 'if [[ -z "$1" ]]; then shift; fi' # TODO: explain this
+local _OPTS_COUNT=${OPTS_COUNT}
+EOF
+  cat <<EOF
+local TMP # see https://unix.stackexchange.com/a/88338/84520
+TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
+  || exit \$?
+eval set -- "\$TMP"
+while true; do
+  $CASE_HANDLER
+  shift
+done
+shift
+
+local _OPTS_COUNT=${OPTS_COUNT}
+EOF
+#  echo 'if [[ -z "$1" ]]; then shift; fi' # TODO: explain this
 }
