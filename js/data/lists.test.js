@@ -31,6 +31,29 @@ describe('list-add-item', () => {
   })
 })
 
+describe('list-add-uniq', () => {
+  test('should add a new item', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'bar; list-add-uniq LIST baz; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\nbaz\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('list should remain unchanged when adding already present item', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'bar; list-add-uniq LIST foo; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('should add new items but not existing items when adding multilpe items', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'bar; list-add-uniq LIST foo baz; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\nbaz\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+})
+
 describe('list-rm-item', () => {
   test('properly removes a single item at the head of a list', () => {
     const result =
