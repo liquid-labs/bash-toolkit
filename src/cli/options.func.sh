@@ -78,19 +78,6 @@ EOF
 
   echo "$LOCAL_DECLS"
 
-  cat <<EOF >> log.tmp
-local TMP # see https://unix.stackexchange.com/a/88338/84520
-TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
-  || exit \$?
-eval set -- "\$TMP"
-while true; do
-  $CASE_HANDLER
-  shift
-done
-shift
-
-local _OPTS_COUNT=${OPTS_COUNT}
-EOF
   cat <<EOF
 local TMP # see https://unix.stackexchange.com/a/88338/84520
 TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
