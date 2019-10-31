@@ -81,7 +81,6 @@ setSimpleOptions() {
   local VAR_SPEC LOCAL_DECLS
   local LONG_OPTS=""
   local SHORT_OPTS=""
-  local OPTS_COUNT=0
   # Bash Bug? This looks like a straight up bug in bash, but the left-paren in
   # '--)' was matching the '$(' and causing a syntax error. So we use ']' and
   # replace it later.
@@ -124,7 +123,7 @@ EOF
     ${CASE_HANDLER}
       -${SHORT_OPT}|--${LONG_OPT}]
         $VAR_SETTER
-        OPTS_COUNT=\$(( \$OPTS_COUNT + 1));;
+        _OPTS_COUNT=\$(( \$_OPTS_COUNT + 1));;
 EOF
 )
   done # main while loop
@@ -144,13 +143,12 @@ local TMP # see https://unix.stackexchange.com/a/88338/84520
 TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
   || exit \$?
 eval set -- "\$TMP"
+local _OPTS_COUNT=0
 while true; do
   $CASE_HANDLER
   shift
 done
 shift
-
-local _OPTS_COUNT=${OPTS_COUNT}
 EOF
 #  echo 'if [[ -z "$1" ]]; then shift; fi' # TODO: explain this
 }
