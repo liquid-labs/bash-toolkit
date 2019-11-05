@@ -25,4 +25,12 @@ purple_u="${purple}${underline}"
 cyan_u="${cyan}${underline}"
 white_u="${white}${underline}"
 
+red_bu="${red}${bold}${underline}"
+green_bu="${green}${bold}${underline}"
+yellow_bu="${yellow}${bold}${underline}"
+blue_bu="${blue}${bold}${underline}"
+purple_bu="${purple}${bold}${underline}"
+cyan_bu="${cyan}${bold}${underline}"
+white_bu="${white}${bold}${underline}"
+
 reset=`tput sgr0`
