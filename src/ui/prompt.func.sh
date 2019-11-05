@@ -40,20 +40,17 @@ require-answer() {
     DEFAULT="${!VAR}"
   fi
 
-  if [[ -n "${DEFAULT}" ]]; then
-    PROMPT="${PROMPT} (${DEFAULT}) "
+  # TODO: support 'pass-through' options in 'setSimpleOptions'
+  local OPTS=''
+  if [[ -n "$MULTI_LINE" ]]; then
+    OPTS="${OPTS}--multi-line "
   fi
-
   while [[ -z ${!VAR:-} ]] || [[ -n "$FORCE" ]]; do
-    read -r -p "$PROMPT" $VAR
-    if [[ -z ${!VAR:-} ]] && [[ -z "$DEFAULT" ]]; then
+    get-answer ${OPTS} "$PROMPT" "$VAR" "$DEFAULT" # can't use "$@" because default may be overriden
+    if [[ -z ${!VAR:-} ]]; then
       echoerr "A response is required."
-    elif [[ -z ${!VAR:-} ]] && [[ -n "$DEFAULT" ]]; then
-      # MacOS dosen't support 'declare -g' :(
-      eval "${VAR}='$(echo "$DEFAULT" | sed "s/'/'\"'\"'/g")'"
-      FORCE=''
-    elif [[ -n "${!VAR:-}" ]] && [[ -n "$FORCE" ]]; then
-      FORCE=''
+    else
+      FORCE='' # if forced into loop, then we un-force when we get an answer
     fi
   done
 }

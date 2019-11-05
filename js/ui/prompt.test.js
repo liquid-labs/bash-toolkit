@@ -3,6 +3,16 @@ import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 const COMPILE_EXEC = 'eval "$(./dist/rollup-bash.sh src/ui/prompt.func.sh -)"'
 
+describe('get-answer', () => {
+  test(`'--multi-line' supports multi-line input`, () => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; unset FOO; get-answer --multi-line "prompt: " FOO <<< 'bar
+baz
+.'; echo "FOO: $FOO"`, execOpts)
+    const expectedOut = expect.stringMatching(/FOO: bar\nbaz\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+})
+
 describe('require-answer', () => {
   /* TODO: tried to optmize by compiling in 'beforeAll', but had challenges
   let compilation
@@ -55,6 +65,18 @@ unset FOO; require-answer "prompt: " FOO <<< ${input}; echo "FOO: $FOO"`, execOp
   test(`will ask for var even when present when forced`, () => {
     const result = shell.exec(`set -e; ${COMPILE_EXEC}; FOO=foo; require-answer --force "prompt: " FOO <<< bar; echo "FOO: $FOO"`, execOpts)
     const expectedOut = expect.stringMatching(/^FOO: bar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test(`will set default to existing value when forced`, () => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; FOO=foo; require-answer --force "prompt: " FOO <<< ''; echo "FOO: $FOO"`, execOpts)
+    const expectedOut = expect.stringMatching(/^FOO: foo\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test(`will recognize override default when forced`, () => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; FOO=foo; require-answer --force "prompt: " FOO BAR <<< ''; echo "FOO: $FOO"`, execOpts)
+    const expectedOut = expect.stringMatching(/^FOO: BAR\n$/)
     assertMatchNoError(result, expectedOut)
   })
 })
