@@ -22,9 +22,14 @@ get-answer() {
     local LINE
     echo "${green_bu}End multi-line input with single '.'${reset}"
     echo "$PROMPT"
+    unset $VAR
     while true; do
       read -r LINE
       [[ "$LINE" == '.' ]] && break
+      if [[ -z "$LINE" ]] && [[ -z ${!VAR:-} ]] && [[ -n "$DEFAULT" ]]; then
+        eval "${VAR}='$(echo "$DEFAULT" | sed "s/'/'\"'\"'/g")'"
+        break
+      fi
       list-add-item $VAR "$LINE"
     done
   fi

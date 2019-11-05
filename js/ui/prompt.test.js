@@ -11,6 +11,13 @@ baz
     const expectedOut = expect.stringMatching(/FOO: bar\nbaz\n$/)
     assertMatchNoError(result, expectedOut)
   })
+
+  test(`'--multi-line' properly supports default`, () => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; unset FOO; get-answer --multi-line "prompt: " FOO 'bar
+baz' <<< ''; echo "FOO: $FOO"`, execOpts)
+    const expectedOut = expect.stringMatching(/FOO: bar\nbaz\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
 })
 
 describe('require-answer', () => {
@@ -77,6 +84,13 @@ unset FOO; require-answer "prompt: " FOO <<< ${input}; echo "FOO: $FOO"`, execOp
   test(`will recognize override default when forced`, () => {
     const result = shell.exec(`set -e; ${COMPILE_EXEC}; FOO=foo; require-answer --force "prompt: " FOO BAR <<< ''; echo "FOO: $FOO"`, execOpts)
     const expectedOut = expect.stringMatching(/^FOO: BAR\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test(`'--multi-line' properly supports default`, () => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; unset FOO; require-answer --multi-line "prompt: " FOO 'bar
+baz' <<< ''; echo "FOO: $FOO"`, execOpts)
+    const expectedOut = expect.stringMatching(/FOO: bar\nbaz\n$/)
     assertMatchNoError(result, expectedOut)
   })
 })
