@@ -8,10 +8,6 @@ get-answer() {
   local VAR="$2" # TODO: if name is 'VAR', then this breaks...
   local DEFAULT="${3:-}"
 
-  if [[ -n "$FORCE" ]] && [[ -z "$DEFAULT" ]]; then
-    DEFAULT="${!VAR}"
-  fi
-
   if [[ -n "${DEFAULT}" ]]; then
     PROMPT="${PROMPT} (${DEFAULT}) "
   fi
@@ -35,7 +31,7 @@ get-answer() {
 }
 
 require-answer() {
-  eval "$(setSimpleOptions FORCE -- "$@")"
+  eval "$(setSimpleOptions FORCE MULTI_LINE -- "$@")"
   local PROMPT="$1"
   local VAR="$2" # TODO: if name is 'VAR', then this breaks...
   local DEFAULT="${3:-}"
