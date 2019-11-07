@@ -67,6 +67,12 @@ describe('setSimpleOptions', () => {
       echo "AOPT: $AOPT"
     }`
 
+    const testShortSuppress = `source src/cli/options.func.sh
+    function f() {
+      eval "$(setSimpleOptions AOPT: -- "$@")"
+      echo "AOPT: $AOPT"
+    }`
+
     test('recognizes long form', () => {
       const result = shell.exec(`${testShortRename}; f --aopt`, execOpts)
       const expectedOut = expect.stringMatching(/^AOPT: true\n$/)
@@ -82,6 +88,15 @@ describe('setSimpleOptions', () => {
     test('rejects default short form', () => {
       const result = shell.exec(`${testShortRename}; f -a`, execOpts)
       const expectedErr = expect.stringMatching(/getopt: invalid option -- a/)
+      expect(result.stderr).toEqual(expectedErr)
+      expect(result.stdout).toEqual('')
+      expect(result.code).toBe(1)
+    })
+
+    test('suppresses short option when indicated', () => {
+      const result = shell.exec(`${testShortSuppress}; f -a`, execOpts)
+      const expectedErr = expect.stringMatching(/getopt: invalid option -- a/)
+      const expectedOut = expect.stringMatching(/^AOPT: \n$/)
       expect(result.stderr).toEqual(expectedErr)
       expect(result.stdout).toEqual('')
       expect(result.code).toBe(1)
