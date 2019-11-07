@@ -74,10 +74,8 @@ else
 fi
 
 # Usage:
-#   local TMP
-#   TMP=$(setSimpleOptions SHORT LONG= SPECIFY_SHORT:X LONG_SPEC:S= -- "$@") \
+#   eval "$(setSimpleOptions SHORT LONG= SPECIFY_SHORT:X LONG_SPEC:S= -- "$@")" \
 #     || ( contextHelp; echoerrandexit "Bad options."; )
-#   eval "$TMP"
 #
 # Note the use of the intermediate TMP is important to preserve the exit value
 # setSimpleOptions. E.g., doing 'eval "$(setSimpleOptions ...)"' will work fine,
@@ -112,24 +110,30 @@ EOF
       VAR_NAME="$VAR_SPEC"
       SHORT_OPT=$(echo "${VAR_NAME::1}" | tr '[:upper:]' '[:lower:]')
     fi
-    local OPT_REQ=$(echo "$VAR_NAME" | sed -Ee 's/[^=]//g' | tr '=' ':')
-    VAR_NAME=`echo "$VAR_NAME" | tr -d "="`
-    LOWER_NAME=`echo "$VAR_NAME" | tr '[:upper:]' '[:lower:]'`
+    local OPT_ARG=$(echo "$VAR_NAME" | sed -Ee 's/[^=]//g' | tr '=' ':')
+    VAR_NAME=$(echo "$VAR_NAME" | tr -d "=")
+    LOWER_NAME=$(echo "$VAR_NAME" | tr '[:upper:]' '[:lower:]')
     LONG_OPT="$(echo "${LOWER_NAME}" | tr '_' '-')"
 
-    SHORT_OPTS="${SHORT_OPTS:-}${SHORT_OPT}${OPT_REQ}"
+    if [[ -n "${SHORT_OPT}" ]]; then
+      SHORT_OPTS="${SHORT_OPTS:-}${SHORT_OPT}${OPT_ARG}"
+    fi
 
-    LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_REQ}")
+    LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_ARG}")
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
     local VAR_SETTER="${VAR_NAME}=true;"
-    if [[ -n "$OPT_REQ" ]]; then
+    if [[ -n "$OPT_ARG" ]]; then
       LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
       VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
     fi
+    local CASE_SELECT="-${SHORT_OPT}|--${LONG_OPT}]"
+    if [[ -z "$SHORT_OPT" ]]; then
+      CASE_SELECT="--${LONG_OPT}]"
+    fi
     CASE_HANDLER=$(cat <<EOF
     ${CASE_HANDLER}
-      -${SHORT_OPT}|--${LONG_OPT}]
+      ${CASE_SELECT}
         $VAR_SETTER
         _OPTS_COUNT=\$(( \$_OPTS_COUNT + 1));;
 EOF
