@@ -43,18 +43,18 @@ EOF
       VAR_NAME="$VAR_SPEC"
       SHORT_OPT=$(echo "${VAR_NAME::1}" | tr '[:upper:]' '[:lower:]')
     fi
-    local OPT_REQ=$(echo "$VAR_NAME" | sed -Ee 's/[^=]//g' | tr '=' ':')
+    local OPT_ARG=$(echo "$VAR_NAME" | sed -Ee 's/[^=]//g' | tr '=' ':')
     VAR_NAME=$(echo "$VAR_NAME" | tr -d "=")
     LOWER_NAME=$(echo "$VAR_NAME" | tr '[:upper:]' '[:lower:]')
     LONG_OPT="$(echo "${LOWER_NAME}" | tr '_' '-')"
 
-    SHORT_OPTS="${SHORT_OPTS:-}${SHORT_OPT}${OPT_REQ}"
+    SHORT_OPTS="${SHORT_OPTS:-}${SHORT_OPT}${OPT_ARG}"
 
-    LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_REQ}")
+    LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_ARG}")
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
     local VAR_SETTER="${VAR_NAME}=true;"
-    if [[ -n "$OPT_REQ" ]]; then
+    if [[ -n "$OPT_ARG" ]]; then
       LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
       VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
     fi
