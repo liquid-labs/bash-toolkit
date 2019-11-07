@@ -44,8 +44,8 @@ EOF
       SHORT_OPT=$(echo "${VAR_NAME::1}" | tr '[:upper:]' '[:lower:]')
     fi
     local OPT_REQ=$(echo "$VAR_NAME" | sed -Ee 's/[^=]//g' | tr '=' ':')
-    VAR_NAME=`echo "$VAR_NAME" | tr -d "="`
-    LOWER_NAME=`echo "$VAR_NAME" | tr '[:upper:]' '[:lower:]'`
+    VAR_NAME=$(echo "$VAR_NAME" | tr -d "=")
+    LOWER_NAME=$(echo "$VAR_NAME" | tr '[:upper:]' '[:lower:]')
     LONG_OPT="$(echo "${LOWER_NAME}" | tr '_' '-')"
 
     SHORT_OPTS="${SHORT_OPTS:-}${SHORT_OPT}${OPT_REQ}"
