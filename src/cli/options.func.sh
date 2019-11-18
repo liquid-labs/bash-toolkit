@@ -1,7 +1,5 @@
 import lists
 
-echo "a" >> log.tmp
-
 if [[ $(uname) == 'Darwin' ]]; then
   GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
 else
@@ -36,11 +34,9 @@ EOF
     fi
     VAR_SPEC="$1"; shift
     local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT PASSTHRU
-    echo "VAR_SPEC: $VAR_SPEC" >> log.tmp
     if [[ "$VAR_SPEC" == *'^' ]]; then
       PASSTHRU=true
       VAR_SPEC=${VAR_SPEC/%^/}
-      echo "VAR_SPEC - ^: $VAR_SPEC" >> log.tmp
     fi
     if [[ "$VAR_SPEC" == '--' ]]; then
       break
@@ -64,9 +60,7 @@ EOF
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
     local CASE_SELECT="-${SHORT_OPT}|--${LONG_OPT}]"
-    echo "I" >> log.tmp
     if [[ "$PASSTHRU" == true ]]; then # handle passthru
-      echo "I.1" >> log.tmp
       CASE_HANDLER=$(cat <<EOF
         ${CASE_HANDLER}
           ${CASE_SELECT}
@@ -86,7 +80,6 @@ EOF
           shift;;
 EOF
       )
-      echo "II" >> log.tmp
     else # non-passthru vars
       local VAR_SETTER="${VAR_NAME}=true;"
       if [[ -n "$OPT_ARG" ]]; then
@@ -116,8 +109,6 @@ EOF
   CASE_HANDLER=$(echo "$CASE_HANDLER" | perl -pe 's/\]$/)/')
 
   echo "$LOCAL_DECLS"
-
-  echo "$CASE_HANDLER" >> log.tmp
 
   cat <<EOF
 local TMP # see https://unix.stackexchange.com/a/88338/84520
