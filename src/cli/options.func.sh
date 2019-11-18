@@ -1,3 +1,7 @@
+import lists
+
+echo "a" >> log.tmp
+
 if [[ $(uname) == 'Darwin' ]]; then
   GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
 else
@@ -31,7 +35,13 @@ EOF
       echoerrandexit "setSimpleOptions: No argument to process; did you forget to include the '--' marker?"
     fi
     VAR_SPEC="$1"; shift
-    local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT
+    local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT PASSTHRU
+    echo "VAR_SPEC: $VAR_SPEC" >> log.tmp
+    if [[ "$VAR_SPEC" == *'^' ]]; then
+      PASSTHRU=true
+      VAR_SPEC=${VAR_SPEC/%^/}
+      echo "VAR_SPEC - ^: $VAR_SPEC" >> log.tmp
+    fi
     if [[ "$VAR_SPEC" == '--' ]]; then
       break
     elif [[ "$VAR_SPEC" == *':'* ]]; then
@@ -53,25 +63,51 @@ EOF
     LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_ARG}")
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
-    local VAR_SETTER="${VAR_NAME}=true;"
-    if [[ -n "$OPT_ARG" ]]; then
-      LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
-      VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
-    fi
     local CASE_SELECT="-${SHORT_OPT}|--${LONG_OPT}]"
-    if [[ -z "$SHORT_OPT" ]]; then
-      CASE_SELECT="--${LONG_OPT}]"
-    fi
-    CASE_HANDLER=$(cat <<EOF
-    ${CASE_HANDLER}
-      ${CASE_SELECT}
-        $VAR_SETTER
-        _OPTS_COUNT=\$(( \$_OPTS_COUNT + 1));;
+    echo "I" >> log.tmp
+    if [[ "$PASSTHRU" == true ]]; then # handle passthru
+      echo "I.1" >> log.tmp
+      CASE_HANDLER=$(cat <<EOF
+        ${CASE_HANDLER}
+          ${CASE_SELECT}
+          list-add-item _PASSTHRU "\$1"
 EOF
-)
+      )
+      if [[ -n "$OPT_ARG" ]]; then
+        CASE_HANDLER=$(cat <<EOF
+          ${CASE_HANDLER}
+            list-add-item _PASSTHRU "\$2"
+            shift
+EOF
+        )
+      fi
+      CASE_HANDLER=$(cat <<EOF
+        ${CASE_HANDLER}
+          shift;;
+EOF
+      )
+      echo "II" >> log.tmp
+    else # non-passthru vars
+      local VAR_SETTER="${VAR_NAME}=true;"
+      if [[ -n "$OPT_ARG" ]]; then
+        LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
+        VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
+      fi
+      if [[ -z "$SHORT_OPT" ]]; then
+        CASE_SELECT="--${LONG_OPT}]"
+      fi
+      CASE_HANDLER=$(cat <<EOF
+      ${CASE_HANDLER}
+        ${CASE_SELECT}
+          $VAR_SETTER
+          _OPTS_COUNT=\$(( \$_OPTS_COUNT + 1))
+          shift;;
+EOF
+      )
+    fi
   done # main while loop
   CASE_HANDLER=$(cat <<EOF
-    case "\$1" in
+    case "\${1}" in
       $CASE_HANDLER
     esac
 EOF
@@ -81,6 +117,8 @@ EOF
 
   echo "$LOCAL_DECLS"
 
+  echo "$CASE_HANDLER" >> log.tmp
+
   cat <<EOF
 local TMP # see https://unix.stackexchange.com/a/88338/84520
 TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
@@ -89,9 +127,10 @@ eval set -- "\$TMP"
 local _OPTS_COUNT=0
 while true; do
   $CASE_HANDLER
-  shift
 done
 shift
+if [[ -n "\$_PASSTHRU" ]]; then
+  set -- "\$_PASSTHRU" "\$@"
+fi
 EOF
-#  echo 'if [[ -z "$1" ]]; then shift; fi' # TODO: explain this
 }
