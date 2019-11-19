@@ -134,11 +134,19 @@ describe('setSimpleOptions', () => {
     })
   }) // describe('required value'...
 
-  describe('passthru values', () => {
+  describe.only('passthru values', () => {
     test.each([[`--opt`, `OPT^`, `--opt`],
                [`-o`, `OPT^`, `-o`],
-               [`--opt=foo`, `OPT=^`, `--opt\nfoo`]])
-             (`remain on the positional when using %s`, (args, spec, out) => {
+               [`-Z`, `OPT:Z^`, `-Z`],
+               [`--opt=foo`, `OPT=^`, `--opt\nfoo`],
+               [`-o foo`, `OPT=^`, `-o\nfoo`],
+               [`--opt foo`, `OPT=^`, `--opt\nfoo`],
+               [`--opt=foo --no-pass`, `OPT=^ NO_PASS`, `--opt\nfoo`],
+               [`-Z foo`, `OPT:Z=^`, `-Z\nfoo`],
+               [`--opt "foo bar"`, `OPT=^`, `--opt\nfoo bar`],
+               [`--opt "foo 'bar"`, `OPT=^`, `--opt\nfoo 'bar`],
+               [`--opt 'foo "bar'`, `OPT=^`, `--opt\nfoo "bar`]])
+             (`remain on the positional when using options %s`, (args, spec, out) => {
        const result = shell.exec(`set -e; ${COMPILED_EXEC}; function f() { eval "$(setSimpleOptions ${spec} -- "$@")"; echo "$@"; }; f ${args}`, execOpts)
        const expectedOut = expect.stringMatching(new RegExp(`^${out}\n$`))
        assertMatchNoError(result, expectedOut)
