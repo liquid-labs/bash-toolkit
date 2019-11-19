@@ -128,7 +128,7 @@ while true; do
 done
 shift
 if [[ -n "\$_PASSTHRU" ]]; then
-  set -- "\$_PASSTHRU" "\$@"
+  eval set -- \$(list-quote _PASSTHRU) "\$@"
 fi
 EOF
 }
