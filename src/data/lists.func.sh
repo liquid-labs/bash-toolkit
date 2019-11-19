@@ -55,7 +55,7 @@ list-get-index() {
       return
     fi
     INDEX=$(($INDEX + 1))
-  done <<< "${!LIST_VAR}"
+  done <<< "${!LIST_VAR:-}"
 }
 
 list-get-item() {
@@ -80,7 +80,7 @@ list-replace-by-string() {
 
   local ITEM INDEX NEW_LIST
   INDEX=0
-  for ITEM in ${!LIST_VAR}; do
+  for ITEM in ${!LIST_VAR:-}; do
     if [[ "$(list-get-item $LIST_VAR $INDEX)" == "$TEST_ITEM" ]]; then
       list-add-item NEW_LIST "$NEW_ITEM"
     else
@@ -107,5 +107,5 @@ list-quote() {
 
   while read -r ITEM; do
     echo -n "'$(echo "$ITEM" | sed -e "s/'/'\"'\"'/")' "
-  done <<< "${!LIST_VAR}"
+  done <<< "${!LIST_VAR:-}"
 }
