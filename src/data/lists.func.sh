@@ -101,3 +101,11 @@ list-from-csv() {
     done
   done <<< "$CSV"
 }
+
+list-quote() {
+  local LIST_VAR="${1}"
+
+  while read -r ITEM; do
+    echo -n "'$(echo "$ITEM" | sed -e "s/'/'\"'\"'/")' "
+  done <<< "${!LIST_VAR}"
+}
