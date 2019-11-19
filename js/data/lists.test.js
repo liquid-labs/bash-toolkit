@@ -169,3 +169,14 @@ test('list-get-item out of bounds request should echo ""', () => {
   const expectedOut = expect.stringMatching(/^$/)
   assertMatchNoError(result, expectedOut)
 })
+
+describe('list-quote', () => {
+  test.each([[`"hey 'there"`, `'hey '"'"'there'`],
+             [`'hey "there'`, `'hey "there'`]])
+           ('properly escapes %s', (args, out) => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST=billy$'\n'${args}; list-quote LIST`, execOpts)
+    const expectedOut = expect.stringMatching(new RegExp(`^'billy' ${out} $`))
+    assertMatchNoError(result, expectedOut)
+  })
+})

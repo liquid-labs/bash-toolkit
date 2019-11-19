@@ -1,3 +1,5 @@
+import lists
+
 if [[ $(uname) == 'Darwin' ]]; then
   GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
 else
@@ -31,7 +33,18 @@ EOF
       echoerrandexit "setSimpleOptions: No argument to process; did you forget to include the '--' marker?"
     fi
     VAR_SPEC="$1"; shift
-    local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT
+    local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT PASSTHRU
+    PASSTHRU=''
+    if [[ "$VAR_SPEC" == *'^' ]]; then
+      PASSTHRU=true
+      VAR_SPEC=${VAR_SPEC/%^/}
+    fi
+    local OPT_ARG=''
+    if [[ "$VAR_SPEC" == *'=' ]]; then
+      OPT_ARG=':'
+      VAR_SPEC=${VAR_SPEC/%=/}
+    fi
+
     if [[ "$VAR_SPEC" == '--' ]]; then
       break
     elif [[ "$VAR_SPEC" == *':'* ]]; then
@@ -41,7 +54,7 @@ EOF
       VAR_NAME="$VAR_SPEC"
       SHORT_OPT=$(echo "${VAR_NAME::1}" | tr '[:upper:]' '[:lower:]')
     fi
-    local OPT_ARG=$(echo "$VAR_NAME" | sed -Ee 's/[^=]//g' | tr '=' ':')
+
     VAR_NAME=$(echo "$VAR_NAME" | tr -d "=")
     LOWER_NAME=$(echo "$VAR_NAME" | tr '[:upper:]' '[:lower:]')
     LONG_OPT="$(echo "${LOWER_NAME}" | tr '_' '-')"
@@ -53,25 +66,48 @@ EOF
     LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_ARG}")
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
-    local VAR_SETTER="${VAR_NAME}=true;"
-    if [[ -n "$OPT_ARG" ]]; then
-      LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
-      VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
-    fi
     local CASE_SELECT="-${SHORT_OPT}|--${LONG_OPT}]"
-    if [[ -z "$SHORT_OPT" ]]; then
-      CASE_SELECT="--${LONG_OPT}]"
-    fi
-    CASE_HANDLER=$(cat <<EOF
-    ${CASE_HANDLER}
-      ${CASE_SELECT}
-        $VAR_SETTER
-        _OPTS_COUNT=\$(( \$_OPTS_COUNT + 1));;
+    if [[ "$PASSTHRU" == true ]]; then # handle passthru
+      CASE_HANDLER=$(cat <<EOF
+        ${CASE_HANDLER}
+          ${CASE_SELECT}
+          list-add-item _PASSTHRU "\$1"
 EOF
-)
+      )
+      if [[ -n "$OPT_ARG" ]]; then
+        CASE_HANDLER=$(cat <<EOF
+          ${CASE_HANDLER}
+            list-add-item _PASSTHRU "\$2"
+            shift
+EOF
+        )
+      fi
+      CASE_HANDLER=$(cat <<EOF
+        ${CASE_HANDLER}
+          shift;;
+EOF
+      )
+    else # non-passthru vars
+      local VAR_SETTER="${VAR_NAME}=true;"
+      if [[ -n "$OPT_ARG" ]]; then
+        LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
+        VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
+      fi
+      if [[ -z "$SHORT_OPT" ]]; then
+        CASE_SELECT="--${LONG_OPT}]"
+      fi
+      CASE_HANDLER=$(cat <<EOF
+      ${CASE_HANDLER}
+        ${CASE_SELECT}
+          $VAR_SETTER
+          _OPTS_COUNT=\$(( \$_OPTS_COUNT + 1))
+          shift;;
+EOF
+      )
+    fi
   done # main while loop
   CASE_HANDLER=$(cat <<EOF
-    case "\$1" in
+    case "\${1}" in
       $CASE_HANDLER
     esac
 EOF
@@ -89,9 +125,10 @@ eval set -- "\$TMP"
 local _OPTS_COUNT=0
 while true; do
   $CASE_HANDLER
-  shift
 done
 shift
+if [[ -n "\$_PASSTHRU" ]]; then
+  eval set -- \$(list-quote _PASSTHRU) "\$@"
+fi
 EOF
-#  echo 'if [[ -z "$1" ]]; then shift; fi' # TODO: explain this
 }
