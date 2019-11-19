@@ -120,6 +120,7 @@ EOF
 
   cat <<EOF
 local TMP # see https://unix.stackexchange.com/a/88338/84520
+local _PASSTHRU
 TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
   || exit \$?
 eval set -- "\$TMP"
