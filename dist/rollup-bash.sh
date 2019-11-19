@@ -199,7 +199,6 @@ setSimpleOptions() {
   local VAR_SPEC LOCAL_DECLS
   local LONG_OPTS=""
   local SHORT_OPTS=""
-  local _PASSTHRU=""
   # Bash Bug? This looks like a straight up bug in bash, but the left-paren in
   # '--)' was matching the '$(' and causing a syntax error. So we use ']' and
   # replace it later.
@@ -299,7 +298,7 @@ EOF
 
   cat <<EOF
 local TMP # see https://unix.stackexchange.com/a/88338/84520
-local _PASSTHRU
+local _PASSTHRU=""
 TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
   || exit \$?
 eval set -- "\$TMP"
