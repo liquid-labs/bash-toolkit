@@ -130,6 +130,7 @@ setSimpleOptions() {
   local VAR_SPEC LOCAL_DECLS
   local LONG_OPTS=""
   local SHORT_OPTS=""
+  local _PASSTHRU=""
   # Bash Bug? This looks like a straight up bug in bash, but the left-paren in
   # '--)' was matching the '$(' and causing a syntax error. So we use ']' and
   # replace it later.
@@ -143,10 +144,10 @@ EOF
       echoerrandexit "setSimpleOptions: No argument to process; did you forget to include the '--' marker?"
     fi
     VAR_SPEC="$1"; shift
-    local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT PASSTHRU
-    PASSTHRU=''
+    local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT IS_PASSTHRU
+    IS_PASSTHRU=''
     if [[ "$VAR_SPEC" == *'^' ]]; then
-      PASSTHRU=true
+      IS_PASSTHRU=true
       VAR_SPEC=${VAR_SPEC/%^/}
     fi
     local OPT_ARG=''
@@ -177,7 +178,7 @@ EOF
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
     local CASE_SELECT="-${SHORT_OPT}|--${LONG_OPT}]"
-    if [[ "$PASSTHRU" == true ]]; then # handle passthru
+    if [[ "$IS_PASSTHRU" == true ]]; then # handle passthru
       CASE_HANDLER=$(cat <<EOF
         ${CASE_HANDLER}
           ${CASE_SELECT}
