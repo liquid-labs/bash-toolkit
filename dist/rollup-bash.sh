@@ -67,6 +67,118 @@ cyan_bu="${cyan}${bold}${underline}"
 white_bu="${white}${bold}${underline}"
 
 reset=`tput sgr0`
+list-add-item() {
+  local LIST_VAR="${1}"; shift
+  while (( $# > 0 )); do
+    local ITEM
+    ITEM="${1}"; shift
+    # TODO: enforce no newlines in item
+
+    if [[ -n "$ITEM" ]]; then
+      if [[ -z "${!LIST_VAR:-}" ]]; then
+        eval $LIST_VAR='"$ITEM"'
+      else
+        # echo $LIST_VAR='"${!LIST_VAR}"$'"'"'\n'"'"'"${ITEM}"'
+        eval $LIST_VAR='"${!LIST_VAR}"$'"'"'\n'"'"'"${ITEM}"'
+      fi
+    fi
+  done
+}
+
+list-add-uniq() {
+  local LIST_VAR="${1}"; shift
+  while (( $# > 0 )); do
+    local ITEM
+    ITEM="${1}"; shift
+    # TODO: enforce no newlines in item
+    if [[ -z $(list-get-index $LIST_VAR "$ITEM") ]]; then
+      list-add-item $LIST_VAR "$ITEM"
+    fi
+  done
+}
+
+list-rm-item() {
+  local LIST_VAR="${1}"; shift
+  while (( $# > 0 )); do
+    local ITEM NEW_ITEMS
+    ITEM="${1}"; shift
+    ITEM=${ITEM//\/\\/}
+    ITEM=${ITEM//#/\\#}
+    ITEM=${ITEM//./\\.}
+    ITEM=${ITEM//[/\\[}
+    # echo "ITEM: $ITEM" >&2
+    NEW_ITEMS="$(echo "${!LIST_VAR}" | sed -e '\#^'$ITEM'$#d')"
+    eval $LIST_VAR='"'"$NEW_ITEMS"'"'
+  done
+}
+
+list-get-index() {
+  local LIST_VAR="${1}"
+  local TEST="${2}"
+
+  local ITEM
+  local INDEX=0
+  while read -r ITEM; do
+    if [[ "${ITEM}" == "${TEST}" ]]; then
+      echo $INDEX
+      return
+    fi
+    INDEX=$(($INDEX + 1))
+  done <<< "${!LIST_VAR}"
+}
+
+list-get-item() {
+  local LIST_VAR="${1}"
+  local INDEX="${2}"
+
+  local CURR_INDEX=0
+  local ITEM
+  while read -r ITEM; do
+    if (( $CURR_INDEX == $INDEX )) ; then
+      echo -n "${ITEM%\\n}"
+      return
+    fi
+    CURR_INDEX=$(($CURR_INDEX + 1))
+  done <<< "${!LIST_VAR}"
+}
+
+list-replace-by-string() {
+  local LIST_VAR="${1}"
+  local TEST_ITEM="${2}"
+  local NEW_ITEM="${3}"
+
+  local ITEM INDEX NEW_LIST
+  INDEX=0
+  for ITEM in ${!LIST_VAR}; do
+    if [[ "$(list-get-item $LIST_VAR $INDEX)" == "$TEST_ITEM" ]]; then
+      list-add-item NEW_LIST "$NEW_ITEM"
+    else
+      list-add-item NEW_LIST "$ITEM"
+    fi
+    INDEX=$(($INDEX + 1))
+  done
+  eval $LIST_VAR='"'"$NEW_LIST"'"'
+}
+
+list-from-csv() {
+  local LIST_VAR="${1}"
+  local CSV="${2}"
+
+  while IFS=',' read -ra ADDR; do
+    for i in "${ADDR[@]}"; do
+      list-add-item "$LIST_VAR" "$i"
+    done
+  done <<< "$CSV"
+}
+
+list-quote() {
+  local LIST_VAR="${1}"
+
+  while read -r ITEM; do
+    echo -n "'$(echo "$ITEM" | sed -e "s/'/'\"'\"'/")' "
+  done <<< "${!LIST_VAR}"
+}
+
 if [[ $(uname) == 'Darwin' ]]; then
   GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
 else
@@ -100,7 +212,18 @@ EOF
       echoerrandexit "setSimpleOptions: No argument to process; did you forget to include the '--' marker?"
     fi
     VAR_SPEC="$1"; shift
-    local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT
+    local VAR_NAME LOWER_NAME SHORT_OPT LONG_OPT PASSTHRU
+    PASSTHRU=''
+    if [[ "$VAR_SPEC" == *'^' ]]; then
+      PASSTHRU=true
+      VAR_SPEC=${VAR_SPEC/%^/}
+    fi
+    local OPT_ARG=''
+    if [[ "$VAR_SPEC" == *'=' ]]; then
+      OPT_ARG=':'
+      VAR_SPEC=${VAR_SPEC/%=/}
+    fi
+
     if [[ "$VAR_SPEC" == '--' ]]; then
       break
     elif [[ "$VAR_SPEC" == *':'* ]]; then
@@ -110,7 +233,7 @@ EOF
       VAR_NAME="$VAR_SPEC"
       SHORT_OPT=$(echo "${VAR_NAME::1}" | tr '[:upper:]' '[:lower:]')
     fi
-    local OPT_ARG=$(echo "$VAR_NAME" | sed -Ee 's/[^=]//g' | tr '=' ':')
+
     VAR_NAME=$(echo "$VAR_NAME" | tr -d "=")
     LOWER_NAME=$(echo "$VAR_NAME" | tr '[:upper:]' '[:lower:]')
     LONG_OPT="$(echo "${LOWER_NAME}" | tr '_' '-')"
@@ -122,25 +245,48 @@ EOF
     LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_ARG}")
 
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
-    local VAR_SETTER="${VAR_NAME}=true;"
-    if [[ -n "$OPT_ARG" ]]; then
-      LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
-      VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
-    fi
     local CASE_SELECT="-${SHORT_OPT}|--${LONG_OPT}]"
-    if [[ -z "$SHORT_OPT" ]]; then
-      CASE_SELECT="--${LONG_OPT}]"
-    fi
-    CASE_HANDLER=$(cat <<EOF
-    ${CASE_HANDLER}
-      ${CASE_SELECT}
-        $VAR_SETTER
-        _OPTS_COUNT=\$(( \$_OPTS_COUNT + 1));;
+    if [[ "$PASSTHRU" == true ]]; then # handle passthru
+      CASE_HANDLER=$(cat <<EOF
+        ${CASE_HANDLER}
+          ${CASE_SELECT}
+          list-add-item _PASSTHRU "\$1"
 EOF
-)
+      )
+      if [[ -n "$OPT_ARG" ]]; then
+        CASE_HANDLER=$(cat <<EOF
+          ${CASE_HANDLER}
+            list-add-item _PASSTHRU "\$2"
+            shift
+EOF
+        )
+      fi
+      CASE_HANDLER=$(cat <<EOF
+        ${CASE_HANDLER}
+          shift;;
+EOF
+      )
+    else # non-passthru vars
+      local VAR_SETTER="${VAR_NAME}=true;"
+      if [[ -n "$OPT_ARG" ]]; then
+        LOCAL_DECLS="${LOCAL_DECLS}local ${VAR_NAME}_SET='';"
+        VAR_SETTER=${VAR_NAME}'="${2}"; '${VAR_NAME}'_SET=true; shift;'
+      fi
+      if [[ -z "$SHORT_OPT" ]]; then
+        CASE_SELECT="--${LONG_OPT}]"
+      fi
+      CASE_HANDLER=$(cat <<EOF
+      ${CASE_HANDLER}
+        ${CASE_SELECT}
+          $VAR_SETTER
+          _OPTS_COUNT=\$(( \$_OPTS_COUNT + 1))
+          shift;;
+EOF
+      )
+    fi
   done # main while loop
   CASE_HANDLER=$(cat <<EOF
-    case "\$1" in
+    case "\${1}" in
       $CASE_HANDLER
     esac
 EOF
@@ -158,11 +304,12 @@ eval set -- "\$TMP"
 local _OPTS_COUNT=0
 while true; do
   $CASE_HANDLER
-  shift
 done
 shift
+if [[ -n "\$_PASSTHRU" ]]; then
+  eval set -- \$(list-quote _PASSTHRU) "\$@"
+fi
 EOF
-#  echo 'if [[ -z "$1" ]]; then shift; fi' # TODO: explain this
 }
 
 echoerr() {
