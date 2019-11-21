@@ -146,3 +146,33 @@ describe('yes-no', () => {
     expect(result.code).toBe(code)
   })
 })
+
+describe(`gather-answers`, () => {
+  test(`gathers named fields`, () => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; FIELDS='F1 F2'; gather-answers "$FIELDS" <<< 'val1'$'\\n''val2'; echo $F1 $F2`, execOpts)
+    const expectedOut = expect.stringMatching(/^val1 val2\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test(`skips defined fields`, () => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; FIELDS='F1 F2'; F1='foo'; gather-answers "$FIELDS" <<< 'val1'$'\\n''val2'; echo $F1 $F2`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo val1\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  describe(`with '--verify'`, () => {
+    test(`will reflect values and ask for verification`, () => {
+      const result = shell.exec(`set -e; ${COMPILE_EXEC}; FIELDS='F1 F2'; gather-answers --verify "$FIELDS" <<< 'val1'$'\\n''val2'$'\\n''y'; echo $F1 $F2`, execOpts)
+      // notice, we only look at the tail of the output
+      const expectedOut = expect.stringMatching(/Verify the following:\nF1: val1\nF2: val2\s*\nval1 val2\n$/)
+      assertMatchNoError(result, expectedOut)
+    })
+
+    test(`udpates fields on second loop when not verified`, () => {
+      const result = shell.exec(`set -e; ${COMPILE_EXEC}; FIELDS='F1 F2'; gather-answers --verify "$FIELDS" <<< 'val1'$'\\n''val2'$'\\n''n'$'\\n''blah1'$'\\n''blah2'$'\\n'y; echo $F1 $F2`, execOpts)
+      // notice, we only look at the tail of the output
+      const expectedOut = expect.stringMatching(/blah1 blah2\n$/)
+      assertMatchNoError(result, expectedOut)
+    })
+  })
+})
