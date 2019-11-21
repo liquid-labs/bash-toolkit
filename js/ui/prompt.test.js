@@ -94,3 +94,55 @@ baz' <<< ''; echo "FOO: $FOO"`, execOpts)
     assertMatchNoError(result, expectedOut)
   })
 })
+
+describe('yes-no', () => {
+  const didNotUnderstandMatch = expect.stringMatching(/^Did not understand.*/)
+  test.each(['y', 'Y', 'yes', 'YES', 'yES', 'YeS'])(`is positive with for '%s'`, (input) => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; yes-no <<< '${input}'`, execOpts)
+    const expectedOut = expect.stringMatching(/^$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test.each(['n', 'N', 'no', 'NO', 'No', 'nO'])(`is negative with for '%s'`, (input) => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; yes-no <<< '${input}'`, execOpts)
+    expect(result.stderr).toEqual('')
+    expect(result.stdout).toEqual('')
+    expect(result.code).toBe(1)
+  })
+
+  test.each(['yeah', 'nah', 'blah'])(`does not understand '%s' and accepts positive re-query`, (input) => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; yes-no <<< '${input}'$'\\n''y'`, execOpts)
+    assertMatchNoError(result, didNotUnderstandMatch)
+  })
+
+  test.each(['yeah', 'nah', 'blah'])(`does not understand '%s' and accepts negative re-query`, (input) => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; yes-no <<< '${input}'$'\\n''n'`, execOpts)
+    expect(result.stderr).toEqual('')
+    expect(result.stdout).toEqual(didNotUnderstandMatch)
+    expect(result.code).toBe(1)
+  })
+
+  /* TODO: the problem seems to be that 'read' knows it's not in an interactive shell and so
+     supresses the prompt. I can't fix while on plane, so will deal with this later.
+  test.only(`displays prompt as expected`, () => {
+    const prompt=`This is the prompt: `
+    const myOpts = Object.assign({}, execOpts)
+    myOpts.timeout = 2000 // the input redirection kills stdout... so, this is a hack.
+    myOpts.silent = false
+    // const result = shell.exec(`set -e; ${COMPILE_EXEC}; yes-no 'This is the prompt: '`, myOpts)
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; yes-no 'This is the prompt: ' <<< y`, execOpts)
+    const expectedOut = expect.stringMatching(new RegExp(`^${prompt}$`))
+    console.log(`stderr: ${result.stderr}`)
+    console.log(`stdout: ${result.stdout}`)
+    expect(result.stderr).toEqual(expectedOut) // the prompt is actually on stderr
+    expect(result.stdout).toEqual('')
+    expect(result.code).toBe(0)
+  })*/
+
+  test.each([['y', 0], ['n', 1]])(`default '%s' results in return code '%d'.`, (def, code) => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; yes-no '' '${def}' <<< ''`, execOpts)
+    expect(result.stderr).toEqual('')
+    expect(result.stdout).toEqual('')
+    expect(result.code).toBe(code)
+  })
+})
