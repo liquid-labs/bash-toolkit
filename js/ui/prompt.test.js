@@ -160,6 +160,8 @@ describe(`gather-answers`, () => {
     assertMatchNoError(result, expectedOut)
   })
 
+  // TODO: test cutsom prompt
+
   describe(`with '--verify'`, () => {
     test(`will reflect values and ask for verification`, () => {
       const result = shell.exec(`set -e; ${COMPILE_EXEC}; FIELDS='F1 F2'; gather-answers --verify "$FIELDS" <<< 'val1'$'\\n''val2'$'\\n''y'; echo $F1 $F2`, execOpts)
