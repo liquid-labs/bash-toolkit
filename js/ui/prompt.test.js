@@ -14,7 +14,7 @@ baz
 
   test(`'--multi-line' properly supports default`, () => {
     const result = shell.exec(`set -e; ${COMPILE_EXEC}; unset FOO; get-answer --multi-line "prompt: " FOO 'bar
-baz' <<< ''; echo "FOO: $FOO"`, execOpts)
+baz' <<< '.'; echo "FOO: $FOO"`, execOpts)
     const expectedOut = expect.stringMatching(/FOO: bar\nbaz\n$/)
     assertMatchNoError(result, expectedOut)
   })
@@ -89,7 +89,7 @@ unset FOO; require-answer "prompt: " FOO <<< ${input}; echo "FOO: $FOO"`, execOp
 
   test(`'--multi-line' properly supports default`, () => {
     const result = shell.exec(`set -e; ${COMPILE_EXEC}; unset FOO; require-answer --multi-line "prompt: " FOO 'bar
-baz' <<< ''; echo "FOO: $FOO"`, execOpts)
+baz' <<< '.'; echo "FOO: $FOO"`, execOpts)
     const expectedOut = expect.stringMatching(/FOO: bar\nbaz\n$/)
     assertMatchNoError(result, expectedOut)
   })

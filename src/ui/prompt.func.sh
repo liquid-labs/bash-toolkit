@@ -2,6 +2,15 @@ import echoerr
 import lists
 import options
 
+# Prompts the user for input and saves it to a var.
+# Arg 1: The prompt.
+# Arg 2: The name of the var to save the answer to. (BUG: Don't use 'VAR'. 'ANSWER' is always safe.)
+# Arg 3 (opt): Default value to use if the user just hits enter.
+#
+# The defult value will be added to the prompt.
+# If '--multi-line' is specified, the user may enter multiple lines, and end input with a line containing a single '.'.
+# Instructions to this effect will emitted. Also, in this mode, spaces in the answer will be preserved, while in
+# 'single line' mode, leading and trailing spaces will be removed.
 get-answer() {
   eval "$(setSimpleOptions MULTI_LINE -- "$@")"
   local PROMPT="$1"
@@ -9,32 +18,42 @@ get-answer() {
   local DEFAULT="${3:-}"
 
   if [[ -n "${DEFAULT}" ]]; then
-    PROMPT="${PROMPT} (${DEFAULT}) "
+    if [[ -z "$MULTI_LINE" ]]; then
+      PROMPT="${PROMPT} (${DEFAULT}) "
+    else
+      PROMPT="${PROMPT}"$'\n''(Hit "<PERIOD><ENTER>" for default:'$'\n'"$DEFAULT"$'\n'')'
+    fi
   fi
 
   if [[ -z "$MULTI_LINE" ]]; then
     read -r -p "$PROMPT" $VAR
     if [[ -z ${!VAR:-} ]] && [[ -n "$DEFAULT" ]]; then
       # MacOS dosen't support 'declare -g' :(
-      eval "${VAR}='$(echo "$DEFAULT" | sed "s/'/'\"'\"'/g")'"
+      eval $VAR='"$DEFAULT"'
     fi
   else
     local LINE
-    echo "${green_bu}End multi-line input with single '.'${reset}"
     echo "$PROMPT"
-    unset $VAR
+    echo "(End multi-line input with single '.')"
+    unset $VAR LINE
     while true; do
-      read -r LINE
-      [[ "$LINE" == '.' ]] && break
-      if [[ -z "$LINE" ]] && [[ -z ${!VAR:-} ]] && [[ -n "$DEFAULT" ]]; then
-        eval "${VAR}='$(echo "$DEFAULT" | sed "s/'/'\"'\"'/g")'"
+      IFS= read -r LINE
+      if [[ "$LINE" == '.' ]]; then
+        if [[ -z "${!VAR:-}" ]] && [[ -n "$DEFAULT" ]]; then
+          eval $VAR='"$DEFAULT"'
+        fi
         break
+      else
+        list-add-item $VAR "$LINE"
       fi
-      list-add-item $VAR "$LINE"
     done
   fi
 }
 
+# Functions as 'get-answer', but will continually propmt the user if no answer is given.
+# '--force' causes the default to be set to the previous answer and the query to be run again. This is mainly useful
+# internally and direct calls should generally note have cause to use this option. (TODO: let's rewrite this to 'unset'
+# the vars (?) and avoid the need for force?)
 require-answer() {
   eval "$(setSimpleOptions FORCE MULTI_LINE -- "$@")"
   local PROMPT="$1"
@@ -60,18 +79,20 @@ require-answer() {
   done
 }
 
+# Produces a 'yes/no' prompt, accepting 'y', 'yes', 'n', or 'no' (case insensitive). Unlike other prompts, this function
+# returns true or false, making it convenient for boolean tests.
 yes-no() {
   default-yes() { return 0; }
   default-no() { return 1; } # bash false-y
 
   local PROMPT="$1"
-  local DEFAULT=$2
+  local DEFAULT="${2:-}"
   local HANDLE_YES="${3:-default-yes}"
   local HANDLE_NO="${4:-default-no}" # default to noop
 
   local ANSWER=''
   read -p "$PROMPT" ANSWER
-  if [ -z "$ANSWER" ]; then
+  if [[ -z "$ANSWER" ]] && [[ -n "$DEFAULT" ]]; then
     case "$DEFAULT" in
       Y*|y*)
         $HANDLE_YES; return $?;;
