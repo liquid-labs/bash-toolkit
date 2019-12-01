@@ -41,5 +41,10 @@
     "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.24",
     "shelljs": "^0.8.3",
     "watch": "^1.0.2"
+  },
+  "liquidDev": {
+    "changeControl": {
+      "type": "code"
+    }
   }
 }
