@@ -517,7 +517,7 @@ yes-no() {
 }
 
 gather-answers() {
-  eval "$(setSimpleOptions VERIFY PROMPTER= -- "$@")"
+  eval "$(setSimpleOptions VERIFY PROMPTER= DEFAULTER= -- "$@")"
   local FIELDS="${1}"
 
   local FIELD VERIFIED
@@ -534,9 +534,10 @@ gather-answers() {
       local LABEL="$FIELD"
       $(tr '[:lower:]' '[:upper:]' <<< ${foo:0:1})${foo:1}
       LABEL="${LABEL:0:1}$(echo "${LABEL:1}" | tr '[:upper:]' '[:lower:]' | tr '_' ' ')"
-      local PROMPT
+      local PROMPT DEFAULT
       PROMPT="$({ [[ -n "$PROMPTER" ]] && $PROMPTER "$FIELD" "$LABEL"; } || echo "${LABEL}: ")"
-      require-answer ${OPTS} "${PROMPT}" $FIELD
+      DEFAULT="$({ [[ -n "$DEFAULTER" ]] && $DEFAULTER "$FIELD"; } || echo '')"
+      require-answer ${OPTS} "${PROMPT}" $FIELD "$DEFAULT"
     done
 
     # verify, as necessary
@@ -548,6 +549,7 @@ gather-answers() {
       echo
       echo "Verify the following:"
       for FIELD in $FIELDS; do
+        FIELD=${FIELD/:/}
         echo "$FIELD: ${!FIELD}"
       done
       echo
