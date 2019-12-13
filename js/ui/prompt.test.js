@@ -160,6 +160,12 @@ describe(`gather-answers`, () => {
     assertMatchNoError(result, expectedOut)
   })
 
+  test(`supports default answers`, () => {
+    const result = shell.exec(`set -e; ${COMPILE_EXEC}; FIELDS='F1 F2'; defaulter() { case "$1" in F1) echo 'foo1';; F2) echo 'foo2';; esac; }; gather-answers --defaulter=defaulter "$FIELDS" <<< $'\\n'; echo $F1 $F2`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo1 foo2\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
   // TODO: test cutsom prompt
 
   describe(`with '--verify'`, () => {
