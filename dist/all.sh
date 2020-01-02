@@ -43,19 +43,15 @@ list-count() {
   fi
 }
 
-list-rm-item() {
-  local LIST_VAR="${1}"; shift
-  while (( $# > 0 )); do
-    local ITEM NEW_ITEMS
-    ITEM="${1}"; shift
-    ITEM=${ITEM//\/\\/}
-    ITEM=${ITEM//#/\\#}
-    ITEM=${ITEM//./\\.}
-    ITEM=${ITEM//[/\\[}
-    # echo "ITEM: $ITEM" >&2
-    NEW_ITEMS="$(echo "${!LIST_VAR}" | sed -e '\#^'$ITEM'$#d')"
-    eval $LIST_VAR='"'"$NEW_ITEMS"'"'
-  done
+list-from-csv() {
+  local LIST_VAR="${1}"
+  local CSV="${2}"
+
+  while IFS=',' read -ra ADDR; do
+    for i in "${ADDR[@]}"; do
+      list-add-item "$LIST_VAR" "$i"
+    done
+  done <<< "$CSV"
 }
 
 list-get-index() {
@@ -130,23 +126,27 @@ list-replace-by-string() {
   eval $LIST_VAR='"'"$NEW_LIST"'"'
 }
 
-list-from-csv() {
-  local LIST_VAR="${1}"
-  local CSV="${2}"
-
-  while IFS=',' read -ra ADDR; do
-    for i in "${ADDR[@]}"; do
-      list-add-item "$LIST_VAR" "$i"
-    done
-  done <<< "$CSV"
-}
-
 list-quote() {
   local LIST_VAR="${1}"
 
   while read -r ITEM; do
     echo -n "'$(echo "$ITEM" | sed -e "s/'/'\"'\"'/")' "
   done <<< "${!LIST_VAR:-}"
+}
+
+list-rm-item() {
+  local LIST_VAR="${1}"; shift
+  while (( $# > 0 )); do
+    local ITEM NEW_ITEMS
+    ITEM="${1}"; shift
+    ITEM=${ITEM//\/\\/}
+    ITEM=${ITEM//#/\\#}
+    ITEM=${ITEM//./\\.}
+    ITEM=${ITEM//[/\\[}
+    # echo "ITEM: $ITEM" >&2
+    NEW_ITEMS="$(echo "${!LIST_VAR}" | sed -e '\#^'$ITEM'$#d')"
+    eval $LIST_VAR='"'"$NEW_ITEMS"'"'
+  done
 }
 
 if [[ $(uname) == 'Darwin' ]]; then
