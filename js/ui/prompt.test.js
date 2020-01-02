@@ -45,19 +45,19 @@ PID=$!; sleep 0.1; kill $PID`, execOpts)
   })*/
 
   test.each([
-      [`foo`, `foo`],
-      [`'foo bar'`, `foo bar`],
-      [`'hey"mate'`, `hey"mate`],
-      [`"hey'mate"`, `hey'mate`]])
-    (`handles input: %s`, (input, output) => {
-    const result = shell.exec(`set -e; ${COMPILE_EXEC}; unset FOO; require-answer "prompt: " FOO <<< ${input}; echo "FOO: $FOO"`, execOpts)
-    /* const result = shell.exec(`set -e; cat <<'EOFF' | eval
+    [`foo`, `foo`],
+    [`'foo bar'`, `foo bar`],
+    [`'hey"mate'`, `hey"mate`],
+    [`"hey'mate"`, `hey'mate`]])(
+    `handles input: %s`, (input, output) => {
+      const result = shell.exec(`set -e; ${COMPILE_EXEC}; unset FOO; require-answer "prompt: " FOO <<< ${input}; echo "FOO: $FOO"`, execOpts)
+      /* const result = shell.exec(`set -e; cat <<'EOFF' | eval
 ${compilation}
 EOFF
 unset FOO; require-answer "prompt: " FOO <<< ${input}; echo "FOO: $FOO"`, execOpts) */
-    const expectedOut = expect.stringMatching(new RegExp(`^FOO: ${output}\n$`))
-    assertMatchNoError(result, expectedOut)
-  })
+      const expectedOut = expect.stringMatching(new RegExp(`^FOO: ${output}\n$`))
+      assertMatchNoError(result, expectedOut)
+    })
 
   test(`does not ask any questions when var already set`, () => {
     let result = shell.exec(`set -e; ${COMPILE_EXEC}; FOO=foo; require-answer "prompt: " FOO; echo "FOO: $FOO"`, execOpts)

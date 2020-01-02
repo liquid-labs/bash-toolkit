@@ -14,6 +14,7 @@
     "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./src && ./dist/rollup-bash.sh ./src/all.sh ./dist/all.sh",
     "watch": "watch 'npm run build' ./src ./bin",
     "lint": "catalyst-scripts lint",
+    "lint-fix": "catalyst-scripts lint-fix",
     "pretest": "TEST_TYPES=unit catalyst-scripts pretest && mkdir -p test-tmp/ && npm run build",
     "test": "TEST_TYPES=unit catalyst-scripts test",
     "posttest": "rm -rf test-tmp/",

@@ -1,4 +1,4 @@
-/* global test, expect */
+/* global describe, test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 describe('list-add-item', () => {
@@ -60,10 +60,10 @@ describe('list-count', () => {
   ${''} | ${`0`}
   ${`a\nb\nc`} | ${`3`}
   `(`should echo '$output' for list '$list'`, ({list, output}) => {
-    const result = shell.exec(`set -e; source src/data/lists.func.sh; LIST="${list}"; list-count LIST`, execOpts)
-    const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
-    assertMatchNoError(result, expectedOut)
-  })
+  const result = shell.exec(`set -e; source src/data/lists.func.sh; LIST="${list}"; list-count LIST`, execOpts)
+  const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
+  assertMatchNoError(result, expectedOut)
+})
 })
 
 describe('list-from-csv', () =>{
@@ -127,10 +127,10 @@ describe('list-join', () => {
   ${``} | ${`||`} | ${``}
   ${`a\nb\nc`} | ${`||`} | ${`a||b||c`}
   `(`should echo '$output' for list '$list' joined with '$joiner'`, ({list, joiner, output}) => {
-    const result = shell.exec(`set -e; source src/data/lists.func.sh; LIST="${list}"; list-join LIST '${joiner}'`, execOpts)
-    const expectedOut = expect.stringMatching(new RegExp(`^${output}\n$`))
-    assertMatchNoError(result, expectedOut)
-  })
+  const result = shell.exec(`set -e; source src/data/lists.func.sh; LIST="${list}"; list-join LIST '${joiner}'`, execOpts)
+  const expectedOut = expect.stringMatching(new RegExp(`^${output}\n$`))
+  assertMatchNoError(result, expectedOut)
+})
 })
 
 describe('list-replace-by-string', () => {
@@ -151,13 +151,13 @@ describe('list-replace-by-string', () => {
 
 describe('list-quote', () => {
   test.each([[`"hey 'there"`, `'hey '"'"'there'`],
-             [`'hey "there'`, `'hey "there'`]])
-           ('properly escapes %s', (args, out) => {
-    const result =
+    [`'hey "there'`, `'hey "there'`]])(
+    'properly escapes %s', (args, out) => {
+      const result =
       shell.exec(`set -e; source src/data/lists.func.sh; LIST=billy$'\n'${args}; list-quote LIST`, execOpts)
-    const expectedOut = expect.stringMatching(new RegExp(`^'billy' ${out} $`))
-    assertMatchNoError(result, expectedOut)
-  })
+      const expectedOut = expect.stringMatching(new RegExp(`^'billy' ${out} $`))
+      assertMatchNoError(result, expectedOut)
+    })
 })
 
 describe('list-rm-item', () => {
@@ -202,9 +202,9 @@ describe('list-rm-item', () => {
   ${`[`} | ${`in the middle`} | ${`b[a]r`}
   ${`[`} | ${`at front`} | ${`[f]oo`}
   `(`deals with special character '$char' $desc`, ({testEntry}) => {
-    const result =
+  const result =
       shell.exec(`set -e; source src/data/lists.func.sh; LIST=foo$'\n'"${testEntry}"$'\n'bar; list-rm-item LIST "${testEntry}"; echo "$LIST"`, execOpts)
-    const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
-    assertMatchNoError(result, expectedOut)
-  })
+  const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
+  assertMatchNoError(result, expectedOut)
+})
 })

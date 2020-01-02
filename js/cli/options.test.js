@@ -1,3 +1,4 @@
+/* global describe, test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 const COMPILED_EXEC = 'eval "$(./dist/rollup-bash.sh src/cli/options.func.sh -)"'
@@ -99,7 +100,6 @@ describe('setSimpleOptions', () => {
     test('suppresses short option when indicated', () => {
       const result = shell.exec(`${testShortSuppress}; f -a`, execOpts)
       const expectedErr = expect.stringMatching(/getopt: invalid option -- a/)
-      const expectedOut = expect.stringMatching(/^AOPT: \n$/)
       expect(result.stderr).toEqual(expectedErr)
       expect(result.stdout).toEqual('')
       expect(result.code).toBe(1)
@@ -136,29 +136,29 @@ describe('setSimpleOptions', () => {
 
   describe('passthru values', () => {
     test.each([[`--opt`, `OPT^`, `--opt`],
-               [`--opt foo`, `OPT^`, `--opt foo`],
-               [`-o`, `OPT^`, `-o`],
-               [`-Z`, `OPT:Z^`, `-Z`],
-               [`--opt=foo`, `OPT=^`, `--opt foo`],
-               [`-o foo`, `OPT=^`, `-o foo`],
-               [`--opt foo`, `OPT=^`, `--opt foo`],
-               [`--opt=foo --no-pass`, `OPT=^ NO_PASS`, `--opt foo`],
-               [`-Z foo`, `OPT:Z=^`, `-Z foo`],
-               [`--opt "foo bar"`, `OPT=^`, `--opt foo bar`],
-               [`--opt "foo 'bar"`, `OPT=^`, `--opt foo 'bar`],
-               [`--opt 'foo "bar'`, `OPT=^`, `--opt foo "bar`]])
-             (`remain on the positional when using options %s`, (args, spec, out) => {
-     const result = shell.exec(`set -e; ${COMPILED_EXEC}; function f() { eval "$(setSimpleOptions ${spec} -- "$@")"; echo "$@"; }; f ${args}`, execOpts)
-     const expectedOut = expect.stringMatching(new RegExp(`^${out}\n$`))
-     assertMatchNoError(result, expectedOut)
-    })
+      [`--opt foo`, `OPT^`, `--opt foo`],
+      [`-o`, `OPT^`, `-o`],
+      [`-Z`, `OPT:Z^`, `-Z`],
+      [`--opt=foo`, `OPT=^`, `--opt foo`],
+      [`-o foo`, `OPT=^`, `-o foo`],
+      [`--opt foo`, `OPT=^`, `--opt foo`],
+      [`--opt=foo --no-pass`, `OPT=^ NO_PASS`, `--opt foo`],
+      [`-Z foo`, `OPT:Z=^`, `-Z foo`],
+      [`--opt "foo bar"`, `OPT=^`, `--opt foo bar`],
+      [`--opt "foo 'bar"`, `OPT=^`, `--opt foo 'bar`],
+      [`--opt 'foo "bar'`, `OPT=^`, `--opt foo "bar`]])(
+      `remain on the positional when using options %s`, (args, spec, out) => {
+        const result = shell.exec(`set -e; ${COMPILED_EXEC}; function f() { eval "$(setSimpleOptions ${spec} -- "$@")"; echo "$@"; }; f ${args}`, execOpts)
+        const expectedOut = expect.stringMatching(new RegExp(`^${out}\n$`))
+        assertMatchNoError(result, expectedOut)
+      })
 
     test.each([[`--opt "foo bar"`, `foo bar`],
-               [`--opt "foo' bar"`, `foo' bar`]])
-                  (`will properly passthrough complex parameters`, (args, out) => {
-      const result = shell.exec(`set -e; ${COMPILED_EXEC}; inner() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "$OPT"; }; outer() { eval "$(setSimpleOptions OPT=^ -- "$@")"; inner "$@"; }; outer ${args}`, execOpts)
-      const expectedOut = expect.stringMatching(new RegExp(`^${out}\n$`))
-      assertMatchNoError(result, expectedOut)
-    })
+      [`--opt "foo' bar"`, `foo' bar`]])(
+      `will properly passthrough complex parameters`, (args, out) => {
+        const result = shell.exec(`set -e; ${COMPILED_EXEC}; inner() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "$OPT"; }; outer() { eval "$(setSimpleOptions OPT=^ -- "$@")"; inner "$@"; }; outer ${args}`, execOpts)
+        const expectedOut = expect.stringMatching(new RegExp(`^${out}\n$`))
+        assertMatchNoError(result, expectedOut)
+      })
   })
 })
