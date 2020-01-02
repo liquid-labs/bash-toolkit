@@ -54,6 +54,30 @@ describe('list-add-uniq', () => {
   })
 })
 
+describe('list-count', () => {
+  test.each`
+  list | output
+  ${''} | ${`0`}
+  ${`a\nb\nc`} | ${`3`}
+  `(`should echo '$output' for list '$list'`, ({list, output}) => {
+    const result = shell.exec(`set -e; source src/data/lists.func.sh; LIST="${list}"; list-count LIST`, execOpts)
+    const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
+    assertMatchNoError(result, expectedOut)
+  })
+})
+
+describe('list-join', () => {
+  test.each`
+  list | joiner | output
+  ${``} | ${`||`} | ${``}
+  ${`a\nb\nc`} | ${`||`} | ${`a||b||c`}
+  `(`should echo '$output' for list '$list' joined with '$joiner'`, ({list, joiner, output}) => {
+    const result = shell.exec(`set -e; source src/data/lists.func.sh; LIST="${list}"; list-join LIST '${joiner}'`, execOpts)
+    const expectedOut = expect.stringMatching(new RegExp(`^${output}\n$`))
+    assertMatchNoError(result, expectedOut)
+  })
+})
+
 describe('list-rm-item', () => {
   test('properly removes a single item at the head of a list', () => {
     const result =

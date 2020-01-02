@@ -97,6 +97,21 @@ list-add-uniq() {
   done
 }
 
+# Echos the number of items in the list.
+#
+# Takes single argument, the list var name.
+#
+# Example:
+# list-add-item A B C
+# list-count MY_LIST # echos '3'
+list-count() {
+  if [[ -z "${!1}" ]]; then
+    echo -n "0"
+  else
+    echo -e "${!1}" | wc -l | tr -d '[:space:]'
+  fi
+}
+
 list-rm-item() {
   local LIST_VAR="${1}"; shift
   while (( $# > 0 )); do
@@ -139,6 +154,30 @@ list-get-item() {
       return
     fi
     CURR_INDEX=$(($CURR_INDEX + 1))
+  done <<< "${!LIST_VAR}"
+}
+
+# Joins a list with a given string and echos the result. We use 'echo -e' for the join string, so '\n', '\t', etc. will
+# work.
+#
+# Takes (1) the list variable name, (2) the join string
+#
+# Example:
+# list-add-item MY_LIST A B C
+# list-join MY_LIST '||' # echos 'A||B||C'
+list-join() {
+  local LIST_VAR="${1}"
+  local JOIN_STRING="${2}"
+
+  local CURR_INDEX=0
+  local COUNT
+  COUNT="$(list-count $LIST_VAR)"
+  while read -r ITEM; do
+    echo "$ITEM"
+    CURR_INDEX=$(($CURR_INDEX + 1))
+    if (( $CURR_INDEX < $COUNT )) ; then
+      echo -e "$JOIN_STRING"
+    fi
   done <<< "${!LIST_VAR}"
 }
 
