@@ -116,27 +116,39 @@ yes-no() {
 }
 
 gather-answers() {
-  eval "$(setSimpleOptions VERIFY PROMPTER= DEFAULTER= -- "$@")"
+  eval "$(setSimpleOptions VERIFY PROMPTER= SELECTOR= DEFAULTER= -- "$@")"
   local FIELDS="${1}"
 
   local FIELD VERIFIED
   while [[ "${VERIFIED}" != true ]]; do
     # collect answers
     for FIELD in $FIELDS; do
-      local OPTS=''
-      # if VERIFIED is set, but false, then we need to force require-answer to set the var
-      [[ "$VERIFIED" == false ]] && OPTS='--force '
-      if [[ "${FIELD}" == *: ]]; then
-        FIELD=${FIELD/%:/}
-        OPTS="${OPTS}--multi-line "
-      fi
       local LABEL="$FIELD"
       $(tr '[:lower:]' '[:upper:]' <<< ${foo:0:1})${foo:1}
       LABEL="${LABEL:0:1}$(echo "${LABEL:1}" | tr '[:upper:]' '[:lower:]' | tr '_' ' ')"
-      local PROMPT DEFAULT
+      local PROMPT DEFAULT SELECT_OPTS
       PROMPT="$({ [[ -n "$PROMPTER" ]] && $PROMPTER "$FIELD" "$LABEL"; } || echo "${LABEL}: ")"
       DEFAULT="$({ [[ -n "$DEFAULTER" ]] && $DEFAULTER "$FIELD"; } || echo '')"
-      require-answer ${OPTS} "${PROMPT}" $FIELD "$DEFAULT"
+      if [[ -n "$SELECTOR" ]] && SELECT_OPS="$($SELECTOR "$FIELD")" && [[ -n "$SELECT_OPS" ]]; then
+        if [[ -n ${!FIELD:-} ]]; then # convert comma list to bash-toolkit list
+          eval "$FIELD='$(echo "${!FIELD}" | perl -p -e 's/\s*,\s*/\n/g')'"
+        fi
+        if [[ -z ${!FIELD:-} ]] || [[ "$VERIFIED" == false ]]; then
+          PS3="${PROMPT}"
+          selectDoneCancel "$FIELD" SELECT_OPS
+          unset PS3
+        fi
+      else
+        local OPTS=''
+        # if VERIFIED is set, but false, then we need to force require-answer to set the var
+        [[ "$VERIFIED" == false ]] && OPTS='--force '
+        if [[ "${FIELD}" == *: ]]; then
+          FIELD=${FIELD/%:/}
+          OPTS="${OPTS}--multi-line "
+        fi
+
+        require-answer ${OPTS} "${PROMPT}" $FIELD "$DEFAULT"
+      fi
     done
 
     # verify, as necessary
@@ -149,7 +161,8 @@ gather-answers() {
       echo "Verify the following:"
       for FIELD in $FIELDS; do
         FIELD=${FIELD/:/}
-        echo "$FIELD: ${!FIELD}"
+        # for multi-line values (lists), indent 2+ lines
+        echo -e "$FIELD: ${!FIELD}" | sed '2,$ s/^/   /'
       done
       echo
       yes-no "Are these values correct? (y/N) " N verify no-verify
