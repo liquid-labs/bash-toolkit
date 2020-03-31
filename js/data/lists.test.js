@@ -67,6 +67,13 @@ describe('list-count', () => {
 })
 
 describe('list-from-csv', () =>{
+  test('should create a good list from empty csv', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; list-from-csv LIST ''; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
   test('should create a good list from one item', () => {
     const result =
       shell.exec(`set -e; source src/data/lists.func.sh; list-from-csv LIST foo; echo "$LIST"`, execOpts)
@@ -74,9 +81,23 @@ describe('list-from-csv', () =>{
     assertMatchNoError(result, expectedOut)
   })
 
-  test('should create a good list from multiple items', () => {
+  test('should create a good list from multiple items (no spaces)', () => {
     const result =
       shell.exec(`set -e; source src/data/lists.func.sh; list-from-csv LIST foo,bar; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('should create a good list from multiple items (spaces)', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; list-from-csv LIST "foo , bar"; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('should handle in-place replace', () => {
+    const result =
+      shell.exec(`set -e; source src/data/lists.func.sh; LIST="foo,bar"; list-from-csv LIST; echo "$LIST"`, execOpts)
     const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
     assertMatchNoError(result, expectedOut)
   })

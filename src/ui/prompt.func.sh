@@ -1,6 +1,7 @@
 import echoerr
 import lists
 import options
+import stringlib
 
 # Prompts the user for input and saves it to a var.
 # Arg 1: The prompt.
@@ -123,17 +124,15 @@ gather-answers() {
   while [[ "${VERIFIED}" != true ]]; do
     # collect answers
     for FIELD in $FIELDS; do
-      local LABEL="$FIELD"
-      $(tr '[:lower:]' '[:upper:]' <<< ${foo:0:1})${foo:1}
-      LABEL="${LABEL:0:1}$(echo "${LABEL:1}" | tr '[:upper:]' '[:lower:]' | tr '_' ' ')"
+      local LABEL
+      LABEL="$(field-to-label "$FIELD")"
+
       local PROMPT DEFAULT SELECT_OPTS
       PROMPT="$({ [[ -n "$PROMPTER" ]] && $PROMPTER "$FIELD" "$LABEL"; } || echo "${LABEL}: ")"
       DEFAULT="$({ [[ -n "$DEFAULTER" ]] && $DEFAULTER "$FIELD"; } || echo '')"
       if [[ -n "$SELECTOR" ]] && SELECT_OPS="$($SELECTOR "$FIELD")" && [[ -n "$SELECT_OPS" ]]; then
-        if [[ -n ${!FIELD:-} ]]; then # convert comma list to bash-toolkit list
-          eval "$FIELD='$(echo "${!FIELD}" | perl -p -e 's/\s*,\s*/\n/g')'"
-        fi
-        if [[ -z ${!FIELD:-} ]] || [[ "$VERIFIED" == false ]]; then
+        local FIELD_SET="${FIELD}_SET"
+        if [[ -z ${!FIELD:-} ]] && [[ "${!FIELD_SET}" != 'true' ]] || [[ "$VERIFIED" == false ]]; then
           PS3="${PROMPT}"
           selectDoneCancel "$FIELD" SELECT_OPS
           unset PS3
@@ -161,8 +160,7 @@ gather-answers() {
       echo "Verify the following:"
       for FIELD in $FIELDS; do
         FIELD=${FIELD/:/}
-        # for multi-line values (lists), indent 2+ lines
-        echo -e "$FIELD: ${!FIELD}" | sed '2,$ s/^/   /'
+        echo-label-and-values "${FIELD}" "${!FIELD:-}"
       done
       echo
       yes-no "Are these values correct? (y/N) " N verify no-verify

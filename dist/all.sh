@@ -36,7 +36,7 @@ list-add-uniq() {
 # list-add-item A B C
 # list-count MY_LIST # echos '3'
 list-count() {
-  if [[ -z "${!1}" ]]; then
+  if [[ -z "${!1:-}" ]]; then
     echo -n "0"
   else
     echo -e "${!1}" | wc -l | tr -d '[:space:]'
@@ -45,13 +45,22 @@ list-count() {
 
 list-from-csv() {
   local LIST_VAR="${1}"
-  local CSV="${2}"
+  local CSV="${2:-}"
 
-  while IFS=',' read -ra ADDR; do
-    for i in "${ADDR[@]}"; do
-      list-add-item "$LIST_VAR" "$i"
-    done
-  done <<< "$CSV"
+  if [[ -z "$CSV" ]]; then
+    CSV="${!LIST_VAR}"
+    unset ${LIST_VAR}
+  fi
+
+  if [[ -n "$CSV" ]]; then
+    local ADDR
+    while IFS=',' read -ra ADDR; do
+      for i in "${ADDR[@]}"; do
+        i="$(echo "$i" | awk '{$1=$1};1')"
+        list-add-item "$LIST_VAR" "$i"
+      done
+    done <<< "$CSV"
+  fi
 }
 
 list-get-index() {
@@ -442,6 +451,33 @@ function real_path {
   fi
 }
 
+field-to-label() {
+  local FIELD="${1}"
+  echo "${FIELD:0:1}$(echo "${FIELD:1}" | tr '[:upper:]' '[:lower:]' | tr '_' ' ')"
+}
+
+echo-label-and-values() {
+  eval "$(setSimpleOptions STDERR:e -- "$@")"
+
+  local FIELD="${1}"
+  local VALUES="${2:-}"
+  (( $# == 2 )) || VALUES="${!FIELD:-}"
+  local OUT
+
+  OUT="$(echo -n "$(field-to-label "$FIELD"): ")"
+  if (( $(echo "${VALUES}" | wc -l) > 1 )); then
+    OUT="${OUT}$(echo -e "\n${VALUES}" | sed '2,$ s/^/   /')" # indent
+  else # just one line
+    OUT="${OUT}$(echo "${VALUES}")"
+  fi
+
+  if [[ -z "$STDERR" ]]; then # echo to stdout
+    echo -e "$OUT"
+  else
+    echo -e "$OUT" >&2
+  fi
+}
+
 # Prompts the user for input and saves it to a var.
 # Arg 1: The prompt.
 # Arg 2: The name of the var to save the answer to. (BUG: Don't use 'VAR'. 'ANSWER' is always safe.)
@@ -563,17 +599,15 @@ gather-answers() {
   while [[ "${VERIFIED}" != true ]]; do
     # collect answers
     for FIELD in $FIELDS; do
-      local LABEL="$FIELD"
-      $(tr '[:lower:]' '[:upper:]' <<< ${foo:0:1})${foo:1}
-      LABEL="${LABEL:0:1}$(echo "${LABEL:1}" | tr '[:upper:]' '[:lower:]' | tr '_' ' ')"
+      local LABEL
+      LABEL="$(field-to-label "$FIELD")"
+
       local PROMPT DEFAULT SELECT_OPTS
       PROMPT="$({ [[ -n "$PROMPTER" ]] && $PROMPTER "$FIELD" "$LABEL"; } || echo "${LABEL}: ")"
       DEFAULT="$({ [[ -n "$DEFAULTER" ]] && $DEFAULTER "$FIELD"; } || echo '')"
       if [[ -n "$SELECTOR" ]] && SELECT_OPS="$($SELECTOR "$FIELD")" && [[ -n "$SELECT_OPS" ]]; then
-        if [[ -n ${!FIELD:-} ]]; then # convert comma list to bash-toolkit list
-          eval "$FIELD='$(echo "${!FIELD}" | perl -p -e 's/\s*,\s*/\n/g')'"
-        fi
-        if [[ -z ${!FIELD:-} ]] || [[ "$VERIFIED" == false ]]; then
+        local FIELD_SET="${FIELD}_SET"
+        if [[ -z ${!FIELD:-} ]] && [[ "${!FIELD_SET}" != 'true' ]] || [[ "$VERIFIED" == false ]]; then
           PS3="${PROMPT}"
           selectDoneCancel "$FIELD" SELECT_OPS
           unset PS3
@@ -601,8 +635,7 @@ gather-answers() {
       echo "Verify the following:"
       for FIELD in $FIELDS; do
         FIELD=${FIELD/:/}
-        # for multi-line values (lists), indent 2+ lines
-        echo -e "$FIELD: ${!FIELD}" | sed '2,$ s/^/   /'
+        echo-label-and-values "${FIELD}" "${!FIELD:-}"
       done
       echo
       yes-no "Are these values correct? (y/N) " N verify no-verify
@@ -646,11 +679,7 @@ _commonSelectHelper() {
 
   updateVar() {
     _SELECTION="$(echo "$_SELECTION" | sed -Ee 's/^\*//')"
-    if [[ -z "${!_VAR_NAME:-}" ]]; then
-      eval "${_VAR_NAME}='${_SELECTION}'"
-    else
-      eval "$_VAR_NAME='${!_VAR_NAME} ${_SELECTION}'"
-    fi
+    list-add-item $_VAR_NAME "$_SELECTION"
     _SELECTED_COUNT=$(( $_SELECTED_COUNT + 1 ))
   }
 
@@ -692,9 +721,9 @@ _commonSelectHelper() {
       fi
       # Our user feedback should go to stderr just like the user prompts from select
       if [[ "$_QUIT" != 'true' ]]; then
-        echo "Current selections: ${!_VAR_NAME}" >&2
+        echo-label-and-values --stderr "Current selection" "${!_VAR_NAME}"
       else
-        echo -e "Final selections: ${!_VAR_NAME}" >&2
+        echo-label-and-values --stderr "Final selection" "${!_VAR_NAME:-}"
       fi
       # remove the just selected option
       _OPTIONS=${_OPTIONS/$_SELECTION/}

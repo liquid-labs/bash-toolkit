@@ -105,7 +105,7 @@ list-add-uniq() {
 # list-add-item A B C
 # list-count MY_LIST # echos '3'
 list-count() {
-  if [[ -z "${!1}" ]]; then
+  if [[ -z "${!1:-}" ]]; then
     echo -n "0"
   else
     echo -e "${!1}" | wc -l | tr -d '[:space:]'
@@ -114,13 +114,22 @@ list-count() {
 
 list-from-csv() {
   local LIST_VAR="${1}"
-  local CSV="${2}"
+  local CSV="${2:-}"
 
-  while IFS=',' read -ra ADDR; do
-    for i in "${ADDR[@]}"; do
-      list-add-item "$LIST_VAR" "$i"
-    done
-  done <<< "$CSV"
+  if [[ -z "$CSV" ]]; then
+    CSV="${!LIST_VAR}"
+    unset ${LIST_VAR}
+  fi
+
+  if [[ -n "$CSV" ]]; then
+    local ADDR
+    while IFS=',' read -ra ADDR; do
+      for i in "${ADDR[@]}"; do
+        i="$(echo "$i" | awk '{$1=$1};1')"
+        list-add-item "$LIST_VAR" "$i"
+      done
+    done <<< "$CSV"
+  fi
 }
 
 list-get-index() {
