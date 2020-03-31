@@ -608,6 +608,7 @@ gather-answers() {
       if [[ -n "$SELECTOR" ]] && SELECT_OPS="$($SELECTOR "$FIELD")" && [[ -n "$SELECT_OPS" ]]; then
         local FIELD_SET="${FIELD}_SET"
         if [[ -z ${!FIELD:-} ]] && [[ "${!FIELD_SET}" != 'true' ]] || [[ "$VERIFIED" == false ]]; then
+          unset $FIELD
           PS3="${PROMPT}"
           selectDoneCancel "$FIELD" SELECT_OPS
           unset PS3
