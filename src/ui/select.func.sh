@@ -36,11 +36,7 @@ _commonSelectHelper() {
 
   updateVar() {
     _SELECTION="$(echo "$_SELECTION" | sed -Ee 's/^\*//')"
-    if [[ -z "${!_VAR_NAME:-}" ]]; then
-      eval "${_VAR_NAME}='${_SELECTION}'"
-    else
-      eval "$_VAR_NAME='${!_VAR_NAME} ${_SELECTION}'"
-    fi
+    list-add-item $_VAR_NAME "$_SELECTION"
     _SELECTED_COUNT=$(( $_SELECTED_COUNT + 1 ))
   }
 
@@ -82,9 +78,9 @@ _commonSelectHelper() {
       fi
       # Our user feedback should go to stderr just like the user prompts from select
       if [[ "$_QUIT" != 'true' ]]; then
-        echo "Current selections: ${!_VAR_NAME}" >&2
+        echo-label-and-values --stderr "Current selection" "${!_VAR_NAME}"
       else
-        echo -e "Final selections: ${!_VAR_NAME}" >&2
+        echo-label-and-values --stderr "Final selection" "${!_VAR_NAME:-}"
       fi
       # remove the just selected option
       _OPTIONS=${_OPTIONS/$_SELECTION/}
