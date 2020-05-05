@@ -2,7 +2,7 @@
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
 // TODO: run once and capture inresult
-const COMPILED_EXEC = 'eval "$(./dist/rollup-bash.sh src/files/find_exec.func.sh -)"'
+const COMPILED_EXEC = 'eval "$(./dist/rollup-bash.sh bash/files/find_exec.func.sh -)"'
 
 test('find_exec will find npm-local executables', () => {
   const result = shell.exec(`${COMPILED_EXEC} && find_exec eslint "$PWD"`, execOpts)

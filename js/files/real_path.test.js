@@ -32,7 +32,7 @@ const realDir = expect.stringMatching(new RegExp(`/tmp/foo/real_dir\\s*$`))
 
 const verifyLink = (linkPath, expectedOut) => {
   const result =
-    shell.exec(`source src/files/real_path.func.sh && real_path ${linkPath}`, execOpts)
+    shell.exec(`source bash/files/real_path.func.sh && real_path ${linkPath}`, execOpts)
 
   assertMatchNoError(result, expectedOut)
 }
@@ -72,7 +72,7 @@ test('real_path should end in the same working directory', () => {
   // The issue was uncovered when resolving a relative link.
   const startDir = shell.pwd() + '' // .pwd() is returning an object...
   const result =
-    shell.exec(`source src/files/real_path.func.sh && real_path /tmp/foo/real_dir2/link_file_rel >/dev/null && echo -n "$PWD"`, execOpts)
+    shell.exec(`source bash/files/real_path.func.sh && real_path /tmp/foo/real_dir2/link_file_rel >/dev/null && echo -n "$PWD"`, execOpts)
 
   expect(result.stderr).toEqual('')
   expect(result.stdout).toEqual(startDir)

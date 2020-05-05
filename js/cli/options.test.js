@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
-const COMPILED_EXEC = 'eval "$(./dist/rollup-bash.sh src/cli/options.func.sh -)"'
+const COMPILED_EXEC = 'eval "$(./dist/rollup-bash.sh bash/cli/options.func.sh -)"'
 
 const testFuncSimple2Opts = `set -e
 ${COMPILED_EXEC}

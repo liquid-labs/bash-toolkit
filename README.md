@@ -30,4 +30,4 @@ including the folder hierarchy / scoped names; e.g.:
 
 The `bash-import` will inline the library function at that point.
 
-*CAVEATS* The bash source code must currently be in [`src`](https://github.com/Liquid-Labs/bash-toolkit/issues/2).
+*CAVEATS* The bash source code must currently be in [`bash`](https://github.com/Liquid-Labs/bash-toolkit/issues/2).

@@ -1,7 +1,7 @@
 /* global test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
-const COMPILE_EXEC = 'eval "$(./dist/rollup-bash.sh src/ui/select.func.sh -)"'
+const COMPILE_EXEC = 'eval "$(./dist/rollup-bash.sh bash/ui/select.func.sh -)"'
 
 test(`'selectOneCancel'-> cancel results in empty RESULT`, () => {
   const result = shell.exec(`${COMPILE_EXEC} && (OPTIONS="option a"$'\\n'"option b"; echo 1 | selectOneCancel RESULT OPTIONS 2>/dev/null; echo -n "$RESULT")`, execOpts)
