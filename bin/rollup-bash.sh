@@ -19,10 +19,10 @@ if [[ "${BASH_SOURCE[0]}" == "${MAIN_FILE}" ]]; then
   }
 else
   # If we see the '.sh' but are not our own target, then it's a test situation.
-  STD_DIR="${PWD}/src"
-  # So, if no '.sh', then we look for the STD_DIR in node_modules.
+  STD_DIR="${PWD}/bash"
+  # So, if no '.sh', then we look for the STD_DIR in node_modulesbash.
   if [[ "${BASH_SOURCE[0]}" != *'.sh' ]]; then
-    STD_DIR="$(npm explore @liquid-labs/bash-toolkit -- pwd)/src"
+    STD_DIR="$(npm explore @liquid-labs/bash-toolkit -- pwd)/bash"
   fi
 
   if [[ -n "${SEARCH_DIRS}" ]]; then
