@@ -44,6 +44,7 @@
     "watch": "^1.0.2"
   },
   "liquidDev": {
+    "orgBase": "git@github.com:Liquid-Labs/Liquid-Labs.git",
     "changeControl": {
       "type": "code"
     }
