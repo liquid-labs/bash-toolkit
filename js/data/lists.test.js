@@ -210,6 +210,13 @@ describe('list-rm-item', () => {
     assertMatchNoError(result, expectedOut)
   })
 
+  test('deals with spaces in items', () => {
+    const result =
+      shell.exec(`set -e; source bash/data/lists.func.sh; LIST='hey there'; list-rm-item LIST 'hey there'; echo "$LIST"`, execOpts)
+    const expectedOut = expect.stringMatching(/^\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
   test.each`
   char | desc| testEntry
   ${`@`} | ${`in the middle`} | ${`foo@bar`}

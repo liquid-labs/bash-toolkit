@@ -153,7 +153,7 @@ list-rm-item() {
     ITEM=${ITEM//./\\.}
     ITEM=${ITEM//[/\\[}
     # echo "ITEM: $ITEM" >&2
-    NEW_ITEMS="$(echo "${!LIST_VAR}" | sed -e '\#^'$ITEM'$#d')"
+    NEW_ITEMS="$(echo "${!LIST_VAR}" | sed -e '\#^'"${ITEM}"'$#d')"
     eval $LIST_VAR='"'"$NEW_ITEMS"'"'
   done
 }
