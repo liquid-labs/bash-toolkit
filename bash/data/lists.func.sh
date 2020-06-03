@@ -93,6 +93,24 @@ list-get-item() {
   done <<< "${!LIST_VAR}"
 }
 
+# Echoes the frist item in the named list matching the given prefix.
+#
+# Example:
+# LIST="foo bar"$'\n'"foo baz"
+# list-get-item-by-prefix LIST "foo " # echoes 'foo bar'
+list-get-item-by-prefix() {
+  local LIST_VAR="${1}"
+  local PREFIX="${2}"
+
+  local ITEM
+  while read -r ITEM; do
+    if [[ "${ITEM}" == "${PREFIX}"* ]] ; then
+      echo -n "${ITEM%\\n}"
+      return
+    fi
+  done <<< "${!LIST_VAR}"
+}
+
 # Joins a list with a given string and echos the result. We use 'echo -e' for the join string, so '\n', '\t', etc. will
 # work.
 #

@@ -106,7 +106,7 @@ describe('list-from-csv', () =>{
 describe('list-get-index', () => {
   test('should echo index of item if present', () => {
     const result =
-      shell.exec(`set -e; source bash/data/lists.func.sh; LIST=hey$'\n'ho; list-get-index LIST ho`, execOpts)
+      shell.exec(`set -e; source bash/data/lists.func.sh; LIST=hey$'\n'there; list-get-index LIST there`, execOpts)
     const expectedOut = expect.stringMatching(/^1\n$/)
     assertMatchNoError(result, expectedOut)
   })
@@ -138,6 +138,29 @@ describe('list-get-item', () => {
     const result =
       shell.exec(`set -e; source bash/data/lists.func.sh; LIST=billy$'\n''hey there'; list-get-item LIST 80 '\n'`, execOpts)
     const expectedOut = expect.stringMatching(/^$/)
+    assertMatchNoError(result, expectedOut)
+  })
+})
+
+describe('list-get-item-by-prefix', () => {
+  test('matches first of multiple matches', () => {
+    const result =
+      shell.exec(`set -e; source bash/data/lists.func.sh; LIST="hey there"$'\n'"hey you"; list-get-item-by-prefix LIST "hey "`, execOpts)
+    const expectedOut = expect.stringMatching(/^hey there$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('echos nothing on no match', () => {
+    const result =
+      shell.exec(`set -e; source bash/data/lists.func.sh; LIST="hey there"$'\n'"hey you"; list-get-item-by-prefix LIST "blah"`, execOpts)
+    const expectedOut = expect.stringMatching(/^$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test('matches interior item', () => {
+    const result =
+      shell.exec(`set -e; source bash/data/lists.func.sh; LIST="look there"$'\n'"hey you"; list-get-item-by-prefix LIST "hey "`, execOpts)
+    const expectedOut = expect.stringMatching(/^hey you$/)
     assertMatchNoError(result, expectedOut)
   })
 })
