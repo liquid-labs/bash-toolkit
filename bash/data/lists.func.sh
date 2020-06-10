@@ -127,10 +127,10 @@ list-join() {
   local COUNT
   COUNT="$(list-count $LIST_VAR)"
   while read -r ITEM; do
-    echo "$ITEM"
+    echo -n "$ITEM"
     CURR_INDEX=$(($CURR_INDEX + 1))
     if (( $CURR_INDEX < $COUNT )) ; then
-      echo -e "$JOIN_STRING"
+      echo -ne "$JOIN_STRING"
     fi
   done <<< "${!LIST_VAR}"
 }
