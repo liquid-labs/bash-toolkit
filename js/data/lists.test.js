@@ -172,7 +172,7 @@ describe('list-join', () => {
   ${`a\nb\nc`} | ${`||`} | ${`a||b||c`}
   `(`should echo '$output' for list '$list' joined with '$joiner'`, ({list, joiner, output}) => {
   const result = shell.exec(`set -e; source bash/data/lists.func.sh; LIST="${list}"; list-join LIST '${joiner}'`, execOpts)
-  const expectedOut = expect.stringMatching(new RegExp(`^${output}\n$`))
+  const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
   assertMatchNoError(result, expectedOut)
 })
 })
