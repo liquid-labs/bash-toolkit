@@ -6,12 +6,9 @@
     "dist/",
     "bash/"
   ],
-  "bin": {
-    "rollup-bash": "dist/rollup-bash.sh"
-  },
   "scripts": {
     "prebuild": "mkdir -p ./dist && rm -rf ./dist/*",
-    "build": "./bin/rollup-bash.sh ./bin/rollup-bash.sh ./dist/rollup-bash.sh ./bash && ./dist/rollup-bash.sh ./bash/all.sh ./dist/all.sh",
+    "build": "./dist/rollup-bash.sh ./bash/all.sh ./dist/all.sh",
     "watch": "watch 'npm run build' ./bash ./bin",
     "lint": "catalyst-scripts lint",
     "lint-fix": "catalyst-scripts lint-fix",
