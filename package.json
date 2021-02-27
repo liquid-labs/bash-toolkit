@@ -7,9 +7,7 @@
     "bash/"
   ],
   "scripts": {
-    "prebuild": "mkdir -p ./dist && rm -rf ./dist/*",
-    "build": "./dist/rollup-bash.sh ./bash/all.sh ./dist/all.sh",
-    "watch": "watch 'npm run build' ./bash ./bin",
+    "build": ":",
     "lint": "catalyst-scripts lint",
     "lint-fix": "catalyst-scripts lint-fix",
     "pretest": "TEST_TYPES=unit catalyst-scripts pretest && mkdir -p test-tmp/ && npm run build",
