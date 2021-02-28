@@ -10,7 +10,8 @@ BASH_ROLLUP:=$(shell npm bin)/bash-rollup
 
 all: $(DIST_BUNDLES)
 
-clean: rm -rf dist
+clean:
+	rm -rf dist
 
 # dist/%: src/% $(SRC_BUNDLES)
 #	mkdir -p $(dir $@)
