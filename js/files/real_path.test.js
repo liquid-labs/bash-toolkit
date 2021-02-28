@@ -32,7 +32,7 @@ const realDir = expect.stringMatching(new RegExp(`/tmp/foo/real_dir\\s*$`))
 
 const verifyLink = (linkPath, expectedOut) => {
   const result =
-    shell.exec(`source bash/files/real_path.func.sh && real_path ${linkPath}`, execOpts)
+    shell.exec(`source dist/files/real_path.func.sh && real_path ${linkPath}`, execOpts)
 
   assertMatchNoError(result, expectedOut)
 }
@@ -68,13 +68,16 @@ test('real_path should trim trailng dir-slash', () => {
   verifyLink('/tmp/foo/link_dir/', realDir)
 })
 
-test('real_path should end in the same working directory', () => {
-  // The issue was uncovered when resolving a relative link.
+test('real_path should not change the working directory', () => {
   const startDir = shell.pwd() + '' // .pwd() is returning an object...
   const result =
-    shell.exec(`source bash/files/real_path.func.sh && real_path /tmp/foo/real_dir2/link_file_rel >/dev/null && echo -n "$PWD"`, execOpts)
+    shell.exec(`source dist/files/real_path.func.sh && real_path /tmp/foo/real_dir2/link_file_rel >/dev/null && echo -n "$PWD"`, execOpts)
 
   expect(result.stderr).toEqual('')
-  expect(result.stdout).toEqual(startDir)
   expect(result.code).toBe(0)
+
+  // the working directory itself may involve symlinks, so we have to analyze it; shell.pwd() will give the 'real' dir,
+  // but bash $PWD gives the logical dir
+  const pwdReal = shell.exec(`source dist/files/real_path.func.sh && real_path "${result.stdout}"`, execOpts).stdout
+  expect(pwdReal).toEqual(pwdReal)
 })

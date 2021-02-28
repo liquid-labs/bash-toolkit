@@ -1,7 +1,7 @@
 /* global test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
-const COMPILE_EXEC = 'eval "$(./dist/rollup-bash.sh bash/ui/stringlib.func.sh -)"'
+const COMPILE_EXEC = 'source dist/ui/stringlib.func.sh'
 
 describe('field-to-label', () => {
   test.each`
