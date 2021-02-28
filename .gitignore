@@ -1,6 +1,6 @@
 /.catalyst
 node_modules/
 /test-staging
-/dist/
 /coverage/
-/.scannerwork
+/.yalc
+/yalc.lock
