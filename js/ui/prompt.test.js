@@ -1,7 +1,7 @@
 /* global test describe expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
-const COMPILE_EXEC = 'eval "$(./dist/rollup-bash.sh bash/ui/prompt.func.sh -)"'
+const COMPILE_EXEC = 'eval "$("$(npm bin)/bash-rollup" bash/ui/prompt.func.sh -)"'
 
 describe('get-answer', () => {
   test(`'--multi-line' supports multi-line input`, () => {
@@ -24,7 +24,7 @@ describe('require-answer', () => {
   /* TODO: tried to optmize by compiling in 'beforeAll', but had challenges
   let compilation
   beforeAll(() => {
-    let result = shell.exec(`./dist/rollup-bash.sh bash/ui/prompt.func.sh -`, execOpts)
+    let result = shell.exec(`"$(npm bin)/bash-rollup" bash/ui/prompt.func.sh -`, execOpts)
     compilation = result.stdout
   })*/
 
