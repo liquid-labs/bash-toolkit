@@ -1,7 +1,7 @@
 /* global test describe expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
-const COMPILE_EXEC = 'eval "$("$(npm bin)/bash-rollup" bash/ui/prompt.func.sh -)"'
+const COMPILE_EXEC = 'source dist/ui/prompt.func.sh'
 
 describe('get-answer', () => {
   test(`'--multi-line' supports multi-line input`, () => {

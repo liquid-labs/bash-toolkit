@@ -3,11 +3,10 @@
   "version": "1.0.0-alpha.42",
   "description": "A collection of useful bash functions.",
   "files": [
-    "dist/",
-    "bash/"
+    "dist"
   ],
   "scripts": {
-    "build": ":",
+    "build": "make",
     "lint": "catalyst-scripts lint",
     "lint-fix": "catalyst-scripts lint-fix",
     "pretest": "TEST_TYPES=unit catalyst-scripts pretest && mkdir -p test-tmp/ && npm run build",
@@ -34,6 +33,7 @@
   },
   "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
   "devDependencies": {
+    "@liquid-labs/bash-rollup": "file:.yalc/@liquid-labs/bash-rollup",
     "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.24",
     "shelljs": "^0.8.3",
     "watch": "^1.0.2"
