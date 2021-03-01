@@ -1,6 +1,6 @@
 {
   "name": "@liquid-labs/bash-toolkit",
-  "version": "1.0.0-alpha.44",
+  "version": "1.0.0-alpha.45",
   "description": "A collection of useful bash functions.",
   "files": [
     "dist"
