@@ -1,8 +1,5 @@
 import echofmt
 
-import colors
-import options
-
 echoerr() {
   echofmt --error "$@"
 }

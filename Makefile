@@ -13,12 +13,8 @@ all: $(DIST_BUNDLES)
 clean:
 	rm -rf dist
 
-# dist/%: src/% $(SRC_BUNDLES)
-#	mkdir -p $(dir $@)
-#	$(BASH_ROLLUP) $< $@
-
-# We could explicitly specify all the depenncies, but let's keep it simple.
-$(DIST_BUNDLES): dist/%: src/%
+# We could explicitly specify all the depenncies, but let's keep it simple. This will perform unecessary builds.
+$(DIST_BUNDLES): dist/%: src/% $(SRC_BUNDLES)
 	mkdir -p $(dir $@)
 	$(BASH_ROLLUP) $< $@
 
