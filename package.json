@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
   "devDependencies": {
-    "@liquid-labs/bash-rollup": "^1.0.0-alpha.1",
+    "@liquid-labs/bash-rollup": "^1.0.0-alpha.3",
     "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.24",
     "shelljs": "^0.8.3",
     "watch": "^1.0.2"
