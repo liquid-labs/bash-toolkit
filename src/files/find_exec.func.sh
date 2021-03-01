@@ -32,6 +32,6 @@ function find_exec {
 function require-exec() {
   local EXEC_NAME="$1"
   if ! find_exec "$@"; then
-    echoerrandexit "Could not locate executable '$EXEC_NAME'; bailing out."
+    EXIT_CODE=10 echoerrandexit "Could not locate executable '$EXEC_NAME'; bailing out."
   fi
 }
