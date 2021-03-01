@@ -363,9 +363,10 @@ echofmt() {
   local OPTIONS='INFO WARN ERROR WIDTH NO_FOLD:F STDERR STDOUT'
   eval "$(setSimpleOptions ${OPTIONS} -- "$@")"
 
-  # first, let's check to see of the message is suppressed
-  ! { [[ -n "${ECHO_SILENT}" ]] && [[ -z "${ERROR}" ]]; } || return
-  ! { [[ -n "${ECHO_QUIET}" ]] && { [[ -z "${ERROR}" ]] || [[ -z "${WARN}" ]]; } || return
+  # First, let's check to see of the message is suppressed. The 'return 0' is explicitly necessary. 'return' sends
+  # along $?, which, if it gets there, is 1 due to the failed previous test.
+  ! { [[ -n "${ECHO_SILENT}" ]] && [[ -z "${ERROR}" ]]; } || return 0
+  ! { [[ -n "${ECHO_QUIET}" ]] && [[ -z "${ERROR}" ]] && [[ -z "${WARN}" ]]; } || return 0
 
   # Examine environment to see if the redirect controls are set.
   if [[ -z "${STDERR}" ]] && [[ -z "${STDOUT}" ]]; then
@@ -380,8 +381,8 @@ echofmt() {
     [[ -n "${WIDTH}" ]] || WIDTH=$DEFAULT_WIDTH
     # ECHO_WIDTH and DEFAULT_WIDTH are both subject to actual terminal width limitations.
     local TERM_WIDITH
-    TERM_WIDTH=$(tput col)
-    (( ${TERM_WIDTH} <= ${WIDTH} )) || WIDTH=${TERM_WIDTH}
+    TERM_WIDTH=$(tput cols)
+    (( ${TERM_WIDTH} >= ${WIDTH} )) || WIDTH=${TERM_WIDTH}
   }
 
   # Determine output color, if any.
@@ -414,26 +415,4 @@ echofmt() {
       echo -e "${COLOR}$*${reset}"
     fi
   fi
-}
-
-
-echoerr() {
-  echofmt --error "$@"
-}
-
-echowarn() {
-  echofmt --warn "$@"
-}
-
-# Echoes a formatted message to STDERR. The default exit code is '1', but if 'EXIT_CODE', then that will be used. E.g.:
-#
-#    EXIT_CODE=5
-#    echoerrandexit "Fatal code 5!"
-#
-# See echofmt for further options and details.
-echoerrandexit() {
-  echofmt --error "$@"
-
-  [[ -z "${EXIT_CODE:-}" ]] || exit ${EXIT_CODE}
-  exit 1
 }

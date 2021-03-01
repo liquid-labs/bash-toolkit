@@ -1,42 +1,25 @@
+import echofmt
+
 import colors
 import options
 
 echoerr() {
-  local TMP
-  TMP=$(setSimpleOptions NO_FOLD:F -- "$@")
-  eval "$TMP"
-
-  if [[ -z "$NO_FOLD" ]]; then
-    echo -e "${red}$*${reset}" | fold -sw 82 >&2
-  else
-    echo -e "${red}$*${reset}"
-  fi
+  echofmt --error "$@"
 }
 
 echowarn() {
-  local TMP
-  TMP=$(setSimpleOptions NO_FOLD:F -- "$@")
-  eval "$TMP"
-
-  if [[ -z "$NO_FOLD" ]]; then
-    echo -e "${yellow}$*${reset}" | fold -sw 82 >&2
-  else
-    echo -e "${yellow}$*${reset}"
-  fi
+  echofmt --warn "$@"
 }
 
+# Echoes a formatted message to STDERR. The default exit code is '1', but if 'EXIT_CODE', then that will be used. E.g.:
+#
+#    EXIT_CODE=5
+#    echoerrandexit "Fatal code 5!"
+#
+# See echofmt for further options and details.
 echoerrandexit() {
-  local TMP
-  TMP=$(setSimpleOptions NO_FOLD:F -- "$@") || $(echo "Bad options: $*"; exit -10)
-  eval "$TMP"
+  echofmt --error "$@"
 
-  local MSG="$1"
-  local EXIT_CODE="${2:-10}"
-  # TODO: consider providing 'passopts' method which coordites with 'setSimpleOptions' to recreate option string
-  if [[ -n "$NO_FOLD" ]]; then
-    echoerr --no-fold "$MSG"
-  else
-    echoerr "$MSG"
-  fi
-  exit $EXIT_CODE
+  [[ -z "${EXIT_CODE:-}" ]] || exit ${EXIT_CODE}
+  exit 1
 }
