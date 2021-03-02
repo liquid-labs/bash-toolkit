@@ -1,6 +1,9 @@
 /* global test, expect, beforeAll, afterAll */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
+const COMPILED_EXEC = 'source dist/files/real_path.func.pkg.sh'
+const STRICT = 'set -o errexit; set -o nounset; set -o pipefail'
+
 beforeAll(() => {
   // setup real dirs and file
   ['/tmp/foo', '/tmp/foo/real_dir', '/tmp/foo/real_dir2']
@@ -32,7 +35,7 @@ const realDir = expect.stringMatching(new RegExp(`/tmp/foo/real_dir\\s*$`))
 
 const verifyLink = (linkPath, expectedOut) => {
   const result =
-    shell.exec(`source dist/files/real_path.func.sh && real_path ${linkPath}`, execOpts)
+    shell.exec(`${STRICT}; ${COMPILED_EXEC}; real_path ${linkPath}`, execOpts)
 
   assertMatchNoError(result, expectedOut)
 }
@@ -69,15 +72,14 @@ test('real_path should trim trailng dir-slash', () => {
 })
 
 test('real_path should not change the working directory', () => {
-  const startDir = shell.pwd() + '' // .pwd() is returning an object...
   const result =
-    shell.exec(`source dist/files/real_path.func.sh && real_path /tmp/foo/real_dir2/link_file_rel >/dev/null && echo -n "$PWD"`, execOpts)
+    shell.exec(`${STRICT}; ${COMPILED_EXEC}; real_path /tmp/foo/real_dir2/link_file_rel >/dev/null && echo -n "$PWD"`, execOpts)
 
   expect(result.stderr).toEqual('')
   expect(result.code).toBe(0)
 
   // the working directory itself may involve symlinks, so we have to analyze it; shell.pwd() will give the 'real' dir,
   // but bash $PWD gives the logical dir
-  const pwdReal = shell.exec(`source dist/files/real_path.func.sh && real_path "${result.stdout}"`, execOpts).stdout
+  const pwdReal = shell.exec(`${STRICT}; ${COMPILED_EXEC}; real_path "${result.stdout}"`, execOpts).stdout
   expect(pwdReal).toEqual(pwdReal)
 })

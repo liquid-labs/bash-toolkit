@@ -86,7 +86,7 @@ yes-no() {
   default-yes() { return 0; }
   default-no() { return 1; } # bash false-y
 
-  local PROMPT="$1"
+  local PROMPT="${1:-}"
   local DEFAULT="${2:-}"
   local HANDLE_YES="${3:-default-yes}"
   local HANDLE_NO="${4:-default-no}" # default to noop
@@ -118,7 +118,7 @@ yes-no() {
 
 gather-answers() {
   eval "$(setSimpleOptions VERIFY PROMPTER= SELECTOR= DEFAULTER= -- "$@")"
-  local FIELDS="${1}"
+  local FIELDS="${1:-}"
 
   local FIELD VERIFIED
   while [[ "${VERIFIED}" != true ]]; do

@@ -46,7 +46,7 @@ list-add-item() {
         eval $LIST_VAR='"$ITEM"'
       else
         # echo $LIST_VAR='"${!LIST_VAR}"$'"'"'\n'"'"'"${ITEM}"'
-        eval $LIST_VAR='"${!LIST_VAR}"$'"'"'\n'"'"'"${ITEM}"'
+        eval $LIST_VAR='"${!LIST_VAR:-}"$'"'"'\n'"'"'"${ITEM}"'
       fi
     fi
   done
@@ -84,7 +84,7 @@ list-from-csv() {
   local CSV="${2:-}"
 
   if [[ -z "$CSV" ]]; then
-    CSV="${!LIST_VAR}"
+    CSV="${!LIST_VAR:-}"
     unset ${LIST_VAR}
   fi
 
@@ -126,7 +126,7 @@ list-get-item() {
       return
     fi
     CURR_INDEX=$(($CURR_INDEX + 1))
-  done <<< "${!LIST_VAR}"
+  done <<< "${!LIST_VAR:-}"
 }
 
 # Echoes the frist item in the named list matching the given prefix.
@@ -144,7 +144,7 @@ list-get-item-by-prefix() {
       echo -n "${ITEM%\\n}"
       return
     fi
-  done <<< "${!LIST_VAR}"
+  done <<< "${!LIST_VAR:-}"
 }
 
 # Joins a list with a given string and echos the result. We use 'echo -e' for the join string, so '\n', '\t', etc. will
@@ -168,7 +168,7 @@ list-join() {
     if (( $CURR_INDEX < $COUNT )) ; then
       echo -ne "$JOIN_STRING"
     fi
-  done <<< "${!LIST_VAR}"
+  done <<< "${!LIST_VAR:-}"
 }
 
 list-replace-by-string() {
@@ -207,7 +207,7 @@ list-rm-item() {
     ITEM=${ITEM//./\\.}
     ITEM=${ITEM//[/\\[}
     # echo "ITEM: $ITEM" >&2
-    NEW_ITEMS="$(echo "${!LIST_VAR}" | sed -e '\#^'"${ITEM}"'$#d')"
+    NEW_ITEMS="$(echo "${!LIST_VAR:-}" | sed -e '\#^'"${ITEM}"'$#d')"
     eval $LIST_VAR='"'"$NEW_ITEMS"'"'
   done
 }
@@ -548,7 +548,7 @@ yes-no() {
   default-yes() { return 0; }
   default-no() { return 1; } # bash false-y
 
-  local PROMPT="$1"
+  local PROMPT="${1:-}"
   local DEFAULT="${2:-}"
   local HANDLE_YES="${3:-default-yes}"
   local HANDLE_NO="${4:-default-no}" # default to noop
@@ -580,7 +580,7 @@ yes-no() {
 
 gather-answers() {
   eval "$(setSimpleOptions VERIFY PROMPTER= SELECTOR= DEFAULTER= -- "$@")"
-  local FIELDS="${1}"
+  local FIELDS="${1:-}"
 
   local FIELD VERIFIED
   while [[ "${VERIFIED}" != true ]]; do

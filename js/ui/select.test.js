@@ -1,7 +1,8 @@
 /* global test, expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
-const COMPILE_EXEC = 'source dist/ui/select.func.sh'
+const COMPILE_EXEC = 'source dist/ui/select.func.pkg.sh'
+const STRICT = ':' // TODO: setting any of the strict stuff here fails. Best guess is because the tests are non-interactie so things are not getting setup as select expects and it causes errors. We would like some better assurance that all this works in strict scripts, though.
 
 test(`'selectOneCancel'-> cancel results in empty RESULT`, () => {
   const result = shell.exec(`${COMPILE_EXEC} && (OPTIONS="option a"$'\\n'"option b"; echo 1 | selectOneCancel RESULT OPTIONS 2>/dev/null; echo -n "$RESULT")`, execOpts)
@@ -10,10 +11,10 @@ test(`'selectOneCancel'-> cancel results in empty RESULT`, () => {
 })
 
 const OPTIONS = `OPTIONS="option a"$'\\n'"option b"`
+// Select prints options to STDERR so the redirect is hiding the prompt questions.
 const testFunc = (funcName) =>
   `foo() { local RESULT; ${funcName} RESULT OPTIONS 2>/dev/null; echo -n $RESULT; }`
-const testString = (funcName, script) =>
-  `${COMPILE_EXEC} && (${OPTIONS}; ${testFunc(funcName)}; echo "${script}" | foo)`
+const testString = (funcName, script) => `${STRICT}; ${COMPILE_EXEC} && (${OPTIONS}; ${testFunc(funcName)}; echo "${script}" | foo)`
 
 test.each`
 funcName             | choice | selection

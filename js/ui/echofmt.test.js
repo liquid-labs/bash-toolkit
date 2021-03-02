@@ -1,7 +1,7 @@
 /* global test describe expect */
 import { assertMatchNoError, shell, execOpts } from '../testlib'
 
-const COMPILE_EXEC = 'source dist/ui/echofmt.func.sh'
+const COMPILE_EXEC = 'source dist/ui/echofmt.func.pkg.sh'
 const STRICT = 'set -o errexit; set -o nounset; set -o pipefail'
 
 // TODO: We would like to make the output test more precise, but can't seem to find something that matches the color

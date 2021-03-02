@@ -27,6 +27,8 @@ _commonSelectHelper() {
   local _SELECTION
   local _QUIT='false'
 
+  set +o nounset
+
   local _OPTIONS="${!_OPTIONS_LIST_NAME:-}"
   # TODO: would be nice to have a 'prepend-' or 'unshift-' items.
   if [[ -n "$_PRE_OPTS" ]]; then
@@ -45,7 +47,7 @@ _commonSelectHelper() {
   while [[ $_QUIT == 'false' ]]; do
     local OLDIFS="$IFS"
     IFS=$'\n'
-    echo >&2
+    echo >&2 # TODO: why? Select prints to stderr (?) and we want space?
     select _SELECTION in $_OPTIONS; do
       case "$_SELECTION" in
         '<cancel>')
@@ -97,6 +99,7 @@ _commonSelectHelper() {
     done # end select
     IFS="$OLDIFS"
   done
+  set -o nounset
 }
 
 selectOneCancel() {
