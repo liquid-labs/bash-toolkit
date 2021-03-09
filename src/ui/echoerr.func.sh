@@ -21,7 +21,7 @@ echowarn() {
 echoerrandexit() {
   echofmt --error "$@"
 
-  if [[ -z "${ECHO_NEVER_EXIT}" ]]; then
+  if [[ -z "${ECHO_NEVER_EXIT:-}" ]]; then
     [[ -z "${EXIT_CODE:-}" ]] || exit ${EXIT_CODE}
     exit 1
   fi
