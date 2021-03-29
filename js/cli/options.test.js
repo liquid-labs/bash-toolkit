@@ -76,7 +76,7 @@ describe('setSimpleOptions', () => {
     const result = shell.exec(
       `${STRICT}; ${COMPILED_EXEC}; set --; eval "$(setSimpleOptions --script A= -- "$@")"; echo "$A"`,
       execOpts)
-    const expectedOut = expect.stringMatching(/^$/)
+    const expectedOut = expect.stringMatching(/^\n$/)
     assertMatchNoError(result, expectedOut)
   })
 
