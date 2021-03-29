@@ -64,11 +64,19 @@ describe('setSimpleOptions', () => {
     assertMatchNoError(result, expectedOut)
   })
 
-  test("can be used in a root-script with '--script' option", () => {
+  test("can be used in a root-script with '--script' option (setting option)", () => {
     const result = shell.exec(
       `${STRICT}; ${COMPILED_EXEC}; set -- -a "foo bar"; eval "$(setSimpleOptions --script A= -- "$@")"; echo "$A"`,
       execOpts)
     const expectedOut = expect.stringMatching(/^foo bar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
+
+  test("can be used in a root-script with '--script' option (unset option)", () => {
+    const result = shell.exec(
+      `${STRICT}; ${COMPILED_EXEC}; set --; eval "$(setSimpleOptions --script A= -- "$@")"; echo "$A"`,
+      execOpts)
+    const expectedOut = expect.stringMatching(/^$/)
     assertMatchNoError(result, expectedOut)
   })
 

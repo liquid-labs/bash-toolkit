@@ -138,14 +138,15 @@ EOF
   # In script mode, we skip the local declarations. When used in a function
   # (i.e., not in scirpt mode), we declare everything local.
   if [[ -z "${SCRIPT}" ]]; then
-    echo "$LOCAL_DECLS"
+    echo "${LOCAL_DECLS}"
     cat <<'EOF'
 local _OPTS_COUNT=0
 local _PASSTHRU=""
 local TMP # see https://unix.stackexchange.com/a/88338/84520
 EOF
   else # even though we don't declare local, we still want to support 'strict'
-    # mode, so we do have to declare
+    # mode, so we do have to declare, just not local
+    echo "${LOCAL_DECLS}" | sed 's/^local //'
     cat <<'EOF'
 _OPTS_COUNT=0
 _PASSTHRU=""
