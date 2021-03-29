@@ -135,13 +135,20 @@ EOF
 
   # now we actually start the output to be evaled by the caller.
 
-  # in script mode, we skip the local declarations
+  # In script mode, we skip the local declarations. When used in a function
+  # (i.e., not in scirpt mode), we declare everything local.
   if [[ -z "${SCRIPT}" ]]; then
     echo "$LOCAL_DECLS"
     cat <<'EOF'
 local _OPTS_COUNT=0
 local _PASSTHRU=""
 local TMP # see https://unix.stackexchange.com/a/88338/84520
+EOF
+  else # even though we don't declare local, we still want to support 'strict'
+    # mode, so we do have to declare
+    cat <<'EOF'
+_OPTS_COUNT=0
+_PASSTHRU=""
 EOF
   fi
 

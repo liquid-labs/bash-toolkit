@@ -66,7 +66,7 @@ describe('setSimpleOptions', () => {
 
   test("can be used in a root-script with '--script' option", () => {
     const result = shell.exec(
-      `${COMPILED_EXEC}; set -- -a "foo bar"; eval "$(setSimpleOptions --script A= -- "$@")"; echo "$A"`,
+      `${STRICT}; ${COMPILED_EXEC}; set -- -a "foo bar"; eval "$(setSimpleOptions --script A= -- "$@")"; echo "$A"`,
       execOpts)
     const expectedOut = expect.stringMatching(/^foo bar\n$/)
     assertMatchNoError(result, expectedOut)
