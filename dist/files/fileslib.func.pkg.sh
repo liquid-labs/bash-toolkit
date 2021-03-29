@@ -175,6 +175,140 @@ list-rm-item() {
     eval $LIST_VAR='"'"$NEW_ITEMS"'"'
   done
 }
+# http://linuxcommand.org/lc3_adv_tput.php
+red=`tput setaf 1`
+green=`tput setaf 2`
+yellow=`tput setaf 3`
+blue=`tput setaf 4`
+purple=`tput setaf 5`
+cyan=`tput setaf 6`
+white=`tput setaf 7`
+
+bold=`tput bold`
+red_b="${red}${bold}"
+green_b="${green}${bold}"
+yellow_b="${yellow}${bold}"
+blue_b="${blue}${bold}"
+purple_b="${purple}${bold}"
+cyan_b="${cyan}${bold}"
+white_b="${white}${bold}"
+
+underline=`tput smul`
+red_u="${red}${underline}"
+green_u="${green}${underline}"
+yellow_u="${yellow}${underline}"
+blue_u="${blue}${underline}"
+purple_u="${purple}${underline}"
+cyan_u="${cyan}${underline}"
+white_u="${white}${underline}"
+
+red_bu="${red}${bold}${underline}"
+green_bu="${green}${bold}${underline}"
+yellow_bu="${yellow}${bold}${underline}"
+blue_bu="${blue}${bold}${underline}"
+purple_bu="${purple}${bold}${underline}"
+cyan_bu="${cyan}${bold}${underline}"
+white_bu="${white}${bold}${underline}"
+
+reset=`tput sgr0`
+
+# Formats and echoes the the message.
+#
+# * Will process special chars the same as 'echo -e' (so \t, \n, etc. can be used in the message).
+# * Treats all arguments as the message. 'echofmt "foo bar"' and 'echofmt foo bar' are equivalent.
+# * Error and warning messages are directed towards stderr (unless modified by options).
+# * Default message width is the lesser of 82 columns or the terminal column width.
+# * Environment variable 'ECHO_WIDTH' will set the width. The '--width' option will override the environment variable.
+# * Environment variable 'ECHO_QUIET' will suppress all non-error, non-warning messages if set to any non-empty value.
+# * Environment variable 'ECHO_SILENT' will suppress all non-error messages if set to any non-empty value.
+# * Environment variable 'ECHO_STDERR' will cause all output to be directed to stderr unless '--stderr' or '--stdout'
+#   is specified.
+# * Environment variable 'ECHO_STDOUT' will cause all output to be directed to stdout unless '--stderr' or '--stdout'
+#   is specified.
+echofmt() {
+  local OPTIONS='INFO WARN ERROR WIDTH NO_FOLD:F STDERR STDOUT'
+  eval "$(setSimpleOptions ${OPTIONS} -- "$@")"
+
+  # First, let's check to see of the message is suppressed. The 'return 0' is explicitly necessary. 'return' sends
+  # along $?, which, if it gets there, is 1 due to the failed previous test.
+  ! { [[ -n "${ECHO_SILENT:-}" ]] && [[ -z "${ERROR:-}" ]]; } || return 0
+  ! { [[ -n "${ECHO_QUIET:-}" ]] && [[ -z "${ERROR:-}" ]] && [[ -z "${WARN}" ]]; } || return 0
+
+  # Examine environment to see if the redirect controls are set.
+  if [[ -z "${STDERR:-}" ]] && [[ -z "${STDOUT:-}" ]]; then
+    [[ -z "${ECHO_STDERR:-}" ]] || STDERR=true
+    [[ -z "${ECHO_STDOUT:-}" ]] || STDOUT=true
+  fi
+
+  # Determine width... if folding
+  [[ -z "${NO_FOLD:-}" ]] && [[ -n "${WIDTH:-}" ]] || { # If width is set as an option, then that's the end of story.
+    local DEFAULT_WIDTH=82
+    local WIDTH="${ECHO_WIDTH:-}"
+    [[ -n "${WIDTH:-}" ]] || WIDTH=$DEFAULT_WIDTH
+    # ECHO_WIDTH and DEFAULT_WIDTH are both subject to actual terminal width limitations.
+    local TERM_WIDITH
+    TERM_WIDTH=$(tput cols)
+    (( ${TERM_WIDTH} >= ${WIDTH} )) || WIDTH=${TERM_WIDTH}
+  }
+
+  # Determine output color, if any.
+  # internal helper function; set's 'STDERR' true unless target has already been set with '--stderr' or '--stdout'
+  default-stderr() {
+    [[ -n "${STDERR:-}" ]] || [[ -n "${STDOUT:-}" ]] || STDERR=true
+  }
+  local COLOR=''
+  if [[ -n "${ERROR:-}" ]]; then
+    COLOR="${red}"
+    default-stderr
+  elif [[ -n "${WARN:-}" ]]; then
+    COLOR="${yellow}"
+    default-stderr
+  elif [[ -n "${INFO:-}" ]]; then
+    COLOR="${green}"
+  fi
+
+  # we don't want to use an eval, and the way bash is evaluated means we can't do 'echo ... ${REDIRECT}' or something.
+  if [[ -n "${STDERR:-}" ]]; then
+    if [[ -z "$NO_FOLD" ]]; then
+      echo -e "${COLOR:-}$*${reset}" | fold -sw "${WIDTH}" >&2
+    else
+      echo -e "${COLOR:-}$*${reset}" >&2
+    fi
+  else
+    if [[ -z "${NO_FOLD:-}" ]]; then
+      echo -e "${COLOR:-}$*${reset}" | fold -sw "${WIDTH}"
+    else
+      echo -e "${COLOR:-}$*${reset}"
+    fi
+  fi
+}
+
+echoerr() {
+  echofmt --error "$@"
+}
+
+echowarn() {
+  echofmt --warn "$@"
+}
+
+# Echoes a formatted message to STDERR. The default exit code is '1', but if 'EXIT_CODE', then that will be used. E.g.:
+#
+#    EXIT_CODE=5
+#    echoerrandexit "Fatal code 5
+#
+# 'ECHO_NEVER_EXIT' can be set to any non-falsy value to supress the exit. This is intended primarily for use when liq
+# functions are sourced and called directly from within the main shell, in which case exiting would kill the entire
+# terminal session.
+#
+# See echofmt for further options and details.
+echoerrandexit() {
+  echofmt --error "$@"
+
+  if [[ -z "${ECHO_NEVER_EXIT:-}" ]]; then
+    [[ -z "${EXIT_CODE:-}" ]] || exit ${EXIT_CODE}
+    exit 1
+  fi
+}
 
 if [[ $(uname) == 'Darwin' ]]; then
   GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
@@ -193,9 +327,24 @@ fi
 #
 # Instead, it's generally recommended to be strict, 'set -e', and use the TMP-form.
 setSimpleOptions() {
-  local VAR_SPEC LOCAL_DECLS
+  local SCRIPT VAR_SPEC LOCAL_DECLS
   local LONG_OPTS=""
   local SHORT_OPTS=""
+
+  # our own, bootstrap option processing
+  while [[ "${1:-}" == '-'* ]]; do
+    case "${1}" in
+      --script)
+        SCRIPT=true
+        shift;;
+      --) # usually we'd find a non-option first, but this is valid; we were called with no options specs to process.
+        shift
+        break;;
+      *)
+        echoerrandexit "Unknown option: $1";;
+    esac
+  done
+
   # Bash Bug? This looks like a straight up bug in bash, but the left-paren in
   # '--)' was matching the '$(' and causing a syntax error. So we use ']' and
   # replace it later.
@@ -241,6 +390,8 @@ EOF
 
     LONG_OPTS=$( ( test ${#LONG_OPTS} -gt 0 && echo -n "${LONG_OPTS},") || true && echo -n "${LONG_OPT}${OPT_ARG}")
 
+    # Note, we usually want locals, so we actually just blindling build it up and then decide wether to include it at
+    # the last minute.
     LOCAL_DECLS="${LOCAL_DECLS:-}local ${VAR_NAME}='';"
     local CASE_SELECT="-${SHORT_OPT}|--${LONG_OPT}]"
     if [[ "$IS_PASSTHRU" == true ]]; then # handle passthru
@@ -291,15 +442,22 @@ EOF
   # replace the ']'; see 'Bash Bug?' above
   CASE_HANDLER=$(echo "$CASE_HANDLER" | perl -pe 's/\]$/)/')
 
-  echo "$LOCAL_DECLS"
+  # now we actually start the output to be evaled by the caller.
+
+  # in script mode, we skip the local declarations
+  if [[ -z "${SCRIPT}" ]]; then
+    echo "$LOCAL_DECLS"
+    cat <<'EOF'
+local _OPTS_COUNT=0
+local _PASSTHRU=""
+local TMP # see https://unix.stackexchange.com/a/88338/84520
+EOF
+  fi
 
   cat <<EOF
-local TMP # see https://unix.stackexchange.com/a/88338/84520
-local _PASSTHRU=""
 TMP=\$(${GNU_GETOPT} -o "${SHORT_OPTS}" -l "${LONG_OPTS}" -- "\$@") \
   || exit \$?
 eval set -- "\$TMP"
-local _OPTS_COUNT=0
 while true; do
   $CASE_HANDLER
 done
