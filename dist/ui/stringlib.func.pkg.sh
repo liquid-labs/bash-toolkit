@@ -317,28 +317,23 @@ else
 fi
 
 # Usage:
-#   eval "$(setSimpleOptions SHORT LONG= SPECIFY_SHORT:X LONG_SPEC:S= -- "$@")" \
+#   eval "$(setSimpleOptions DEFAULT VALUE= SPECIFY_SHORT:X NO_SHORT: LONG_ONLY:= COMBINED:C= -- "$@")" \
 #     || ( contextHelp; echoerrandexit "Bad options."; )
-#
-# Note the use of the intermediate TMP is important to preserve the exit value
-# setSimpleOptions. E.g., doing 'eval "$(setSimpleOptions ...)"' will work fine,
-# but because the last statement is the eval of the results, and not the function
-# call itself, the return of setSimpleOptions gets lost.
-#
-# Instead, it's generally recommended to be strict, 'set -e', and use the TMP-form.
 setSimpleOptions() {
-  local SCRIPT VAR_SPEC LOCAL_DECLS
+  local SCRIPT SET_COUNT VAR_SPEC LOCAL_DECLS
   local LONG_OPTS=""
   local SHORT_OPTS=""
 
   # our own, bootstrap option processing
   while [[ "${1:-}" == '-'* ]]; do
-    case "${1}" in
-      --script)
-        SCRIPT=true
+    local OPT="${1}"; shift
+    case "${OPT}" in
+      --set-count)
+        SET_COUNT="${1}"
         shift;;
+      --script)
+        SCRIPT=true;;
       --) # usually we'd find a non-option first, but this is valid; we were called with no options specs to process.
-        shift
         break;;
       *)
         echoerrandexit "Unknown option: $1";;
@@ -474,6 +469,7 @@ if [[ -n "\$_PASSTHRU" ]]; then
   eval set -- \$(list-quote _PASSTHRU) "\$@"
 fi
 EOF
+  [[ -z "${SET_COUNT}" ]] || echo "${SET_COUNT}=\${_OPTS_COUNT}"
 }
 
 field-to-label() {

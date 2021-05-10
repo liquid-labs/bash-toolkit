@@ -212,6 +212,33 @@ list-rm-item() {
   done
 }
 
+echoerr() {
+  echofmt --error "$@"
+}
+
+echowarn() {
+  echofmt --warn "$@"
+}
+
+# Echoes a formatted message to STDERR. The default exit code is '1', but if 'EXIT_CODE', then that will be used. E.g.:
+#
+#    EXIT_CODE=5
+#    echoerrandexit "Fatal code 5
+#
+# 'ECHO_NEVER_EXIT' can be set to any non-falsy value to supress the exit. This is intended primarily for use when liq
+# functions are sourced and called directly from within the main shell, in which case exiting would kill the entire
+# terminal session.
+#
+# See echofmt for further options and details.
+echoerrandexit() {
+  echofmt --error "$@"
+
+  if [[ -z "${ECHO_NEVER_EXIT:-}" ]]; then
+    [[ -z "${EXIT_CODE:-}" ]] || exit ${EXIT_CODE}
+    exit 1
+  fi
+}
+
 if [[ $(uname) == 'Darwin' ]]; then
   GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
 else
@@ -219,28 +246,23 @@ else
 fi
 
 # Usage:
-#   eval "$(setSimpleOptions SHORT LONG= SPECIFY_SHORT:X LONG_SPEC:S= -- "$@")" \
+#   eval "$(setSimpleOptions DEFAULT VALUE= SPECIFY_SHORT:X NO_SHORT: LONG_ONLY:= COMBINED:C= -- "$@")" \
 #     || ( contextHelp; echoerrandexit "Bad options."; )
-#
-# Note the use of the intermediate TMP is important to preserve the exit value
-# setSimpleOptions. E.g., doing 'eval "$(setSimpleOptions ...)"' will work fine,
-# but because the last statement is the eval of the results, and not the function
-# call itself, the return of setSimpleOptions gets lost.
-#
-# Instead, it's generally recommended to be strict, 'set -e', and use the TMP-form.
 setSimpleOptions() {
-  local SCRIPT VAR_SPEC LOCAL_DECLS
+  local SCRIPT SET_COUNT VAR_SPEC LOCAL_DECLS
   local LONG_OPTS=""
   local SHORT_OPTS=""
 
   # our own, bootstrap option processing
   while [[ "${1:-}" == '-'* ]]; do
-    case "${1}" in
-      --script)
-        SCRIPT=true
+    local OPT="${1}"; shift
+    case "${OPT}" in
+      --set-count)
+        SET_COUNT="${1}"
         shift;;
+      --script)
+        SCRIPT=true;;
       --) # usually we'd find a non-option first, but this is valid; we were called with no options specs to process.
-        shift
         break;;
       *)
         echoerrandexit "Unknown option: $1";;
@@ -376,6 +398,7 @@ if [[ -n "\$_PASSTHRU" ]]; then
   eval set -- \$(list-quote _PASSTHRU) "\$@"
 fi
 EOF
+  [[ -z "${SET_COUNT}" ]] || echo "${SET_COUNT}=\${_OPTS_COUNT}"
 }
 
 # Formats and echoes the the message.
