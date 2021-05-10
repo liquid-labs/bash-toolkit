@@ -34,9 +34,8 @@
   "homepage": "https://github.com/Liquid-Labs/bash-toolkit#readme",
   "devDependencies": {
     "@liquid-labs/bash-rollup": "^1.0.0-alpha.4",
-    "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.24",
-    "shelljs": "^0.8.3",
-    "watch": "^1.0.2"
+    "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.34",
+    "shelljs": "^0.8.3"
   },
   "liquidDev": {
     "orgBase": "git@github.com:Liquid-Labs/Liquid-Labs.git",
