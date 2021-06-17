@@ -484,9 +484,6 @@ function find_exec {
     for SEARCH_REF in "$@"; do
       if [[ "${SEARCH_REF}" == '@'* ]]; then # assume it's a package name
         EXEC="$(npm explore "${SEARCH_REF}" -- "npm bin")/${EXEC_NAME}"
-
-        echo "--> $EXEC" >&2
-
         if [[ -x "$EXEC" ]]; then
           echo "${EXEC}"
           return 0
