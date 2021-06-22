@@ -371,7 +371,7 @@ if [[ -n "\$_PASSTHRU" ]]; then
   eval set -- \$(list-quote _PASSTHRU) "\$@"
 fi
 EOF
-  [[ -z "${SET_COUNT}" ]] || echo "${SET_COUNT}=\${_OPTS_COUNT}"
+  [[ -z "${SET_COUNT:-}" ]] || echo "${SET_COUNT}=\${_OPTS_COUNT}"
 }
 
 # Formats and echoes the the message.
@@ -631,7 +631,7 @@ if [[ -n "\$_PASSTHRU" ]]; then
   eval set -- \$(list-quote _PASSTHRU) "\$@"
 fi
 EOF
-  [[ -z "${SET_COUNT}" ]] || echo "${SET_COUNT}=\${_OPTS_COUNT}"
+  [[ -z "${SET_COUNT:-}" ]] || echo "${SET_COUNT}=\${_OPTS_COUNT}"
 }
 list-add-item() {
   local LIST_VAR="${1}"; shift

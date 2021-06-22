@@ -160,5 +160,5 @@ if [[ -n "\$_PASSTHRU" ]]; then
   eval set -- \$(list-quote _PASSTHRU) "\$@"
 fi
 EOF
-  [[ -z "${SET_COUNT}" ]] || echo "${SET_COUNT}=\${_OPTS_COUNT}"
+  [[ -z "${SET_COUNT:-}" ]] || echo "${SET_COUNT}=\${_OPTS_COUNT}"
 }
