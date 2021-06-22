@@ -441,7 +441,7 @@ EOF
 
   # In script mode, we skip the local declarations. When used in a function
   # (i.e., not in scirpt mode), we declare everything local.
-  if [[ -z "${SCRIPT}" ]]; then
+  if [[ -z "${SCRIPT:-}" ]]; then
     echo "${LOCAL_DECLS}"
     cat <<'EOF'
 local _OPTS_COUNT=0
