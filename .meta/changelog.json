@@ -1,0 +1,16 @@
+[
+  {
+    "issues": [
+      "https://github.com/Liquid-Labs/bash-toolkit/issues/31"
+    ],
+    "branch": "2021.06.29-zane@liquid-labs.com-add_strict_model",
+    "startTimestampLocal": "2021-06-29-1504 UTC",
+    "branchFrom": "36f7c29fed9508206cbdb11f89c4db22ae92c63c",
+    "description": "Add strict model",
+    "workInitiator": "zane@liquid-labs.com",
+    "branchInitiator": "zane@liquid-labs.com",
+    "involvedProjects": [
+      "@liquid-labs/bash-toolkit"
+    ]
+  }
+]
