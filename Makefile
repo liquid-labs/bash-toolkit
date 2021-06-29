@@ -1,5 +1,6 @@
 .DELETE_ON_ERROR:
 
+# TODO: let's make the default 'testable' because we make 'combined' files which are time consumuing, but not necessary for testing purposes. Or, if we want to be persnickety, we might run a final test to double check that the combined files build correctly.
 default: all
 
 BUNDLES:=$(shell cd src && find . -name "*.*.sh") # e.g.: ./ui/colors.vars.sh
