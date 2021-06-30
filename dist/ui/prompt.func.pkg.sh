@@ -558,7 +558,7 @@ require-answer() {
   local DEFAULT="${3:-}"
 
   if [[ -n "$FORCE" ]] && [[ -z "$DEFAULT" ]]; then
-    DEFAULT="${!VAR}"
+    DEFAULT="${!VAR:-}"
   fi
 
   # TODO: support 'pass-through' options in 'setSimpleOptions'
