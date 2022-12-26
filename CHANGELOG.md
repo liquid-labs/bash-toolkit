@@ -11,3 +11,4 @@
 * _**hotfix**_: intemediate dev package _(zane@liquid-labs.com; 2022-12-26T16:58:34.000Z)_
 * _**hotfix**_: update for test build _(zane@liquid-labs.com; 2022-12-26T17:00:17.000Z)_
 * _**hotfix**_: fix pretest config _(zane@liquid-labs.com; 2022-12-26T17:03:44.000Z)_
+* _**hotfix**_: updated CHANGELOGE.md for release (by liq) _(zane@liquid-labs.com; 2022-12-26T17:04:04.000Z)_
