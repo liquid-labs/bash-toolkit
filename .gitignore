@@ -1,3 +1,4 @@
+/dist
 /.catalyst
 node_modules/
 /test-staging
