@@ -6,28 +6,28 @@ describe('bash-rollup', () => {
   afterAll(() => shell.rm('-rf', './test-tmp'))
 
   test('bash-rollup will inline basic source', () => {
-    shell.exec(`"$(npm bin)/bash-rollup" ./data/files/test/source_basic.sh ./test-tmp/source_basic.sh`, execOpts)
+    shell.exec(`"$(npm root)/.bin/bash-rollup" ./data/files/test/source_basic.sh ./test-tmp/source_basic.sh`, execOpts)
     const result = shell.exec('./test-tmp/source_basic.sh', execOpts)
     const expectedOut = expect.stringMatching(/^true[\s\n]*$/)
     assertMatchNoError(result, expectedOut)
   })
 
   test('bash-rollup will inline nested source', () => {
-    shell.exec(`"$(npm bin)/bash-rollup" ./data/files/test/source_nested.sh ./test-tmp/source_nested.sh`, execOpts)
+    shell.exec(`"$(npm root)/.bin/bash-rollup" ./data/files/test/source_nested.sh ./test-tmp/source_nested.sh`, execOpts)
     const result = shell.exec('./test-tmp/source_nested.sh', execOpts)
     const expectedOut = expect.stringMatching(/^true\n$/)
     assertMatchNoError(result, expectedOut)
   })
 
   test('bash-rollup will import standard functions', () => {
-    const debug = shell.exec(`"$(npm bin)/bash-rollup" ./data/files/test/import_basic.sh ./test-tmp/import_basic.sh`, execOpts)
+    const debug = shell.exec(`"$(npm root)/.bin/bash-rollup" ./data/files/test/import_basic.sh ./test-tmp/import_basic.sh`, execOpts)
     const result = shell.exec('./test-tmp/import_basic.sh', execOpts)
     const expectedOut = expect.stringMatching(/^a\na\nb\n$/)
     assertMatchNoError(result, expectedOut)
   })
 
   test('bash-rollup will only include a file once', () => {
-    shell.exec(`"$(npm bin)/bash-rollup" ./data/files/test/multi_include.sh ./test-tmp/multi_include.sh`, execOpts)
+    shell.exec(`"$(npm root)/.bin/bash-rollup" ./data/files/test/multi_include.sh ./test-tmp/multi_include.sh`, execOpts)
     const result = shell.exec('./test-tmp/multi_include.sh', execOpts)
     // The script output will test wether the 'echo true' got included only once from source.
     const expectedOut = expect.stringMatching(/^true\n$/)

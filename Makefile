@@ -8,7 +8,7 @@ SRC_BUNDLES:=$(addprefix src/, $(BUNDLES)) # e.g.: dist/./ui/colors.vars.sh
 DIST_BUNDLES:=$(addprefix dist/, $(BUNDLES)) # e.g.: dist/./ui/colors.vars.sh
 PKG_BUNDLES:=$(addsuffix .pkg.sh, $(basename $(DIST_BUNDLES))) # e.g.: dist/./ui/colors.vars.pkg.sh
 
-BASH_ROLLUP:=$(shell npm bin)/bash-rollup
+BASH_ROLLUP:=npm exec bash-rollup
 
 all: $(DIST_BUNDLES) $(PKG_BUNDLES)
 

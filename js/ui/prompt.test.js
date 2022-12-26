@@ -25,7 +25,7 @@ describe('require-answer', () => {
   /* TODO: tried to optmize by compiling in 'beforeAll', but had challenges
   let compilation
   beforeAll(() => {
-    let result = shell.exec(`"$(npm bin)/bash-rollup" bash/ui/prompt.func.sh -`, execOpts)
+    let result = shell.exec(`"$(npm root)/.bin/bash-rollup" bash/ui/prompt.func.sh -`, execOpts)
     compilation = result.stdout
   })*/
 

@@ -11,7 +11,7 @@ A collection of useful bash functions.
 Include the following in the `prepare` script (or, as we do, include `build` and
 call from `prepare`; so long as it's in the process):
 
-    $(npm bin)/catalyst-bash-import
+    npm  exec catalyst-bash-import
 
 === Non-npm usage
 

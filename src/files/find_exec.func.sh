@@ -5,13 +5,13 @@ function find_exec {
   local EXEC_NAME="$1"; shift
 
   # first, we look if it's in our own bin
-  local EXEC="$(npm bin)/$EXEC_NAME"
+  local EXEC="$(npm root)/.bin/$EXEC_NAME"
   # next, we check other named package directories (if any)
   if [[ ! -x "$EXEC" ]]; then
     local SEARCH_REF
     for SEARCH_REF in "$@"; do
       if [[ "${SEARCH_REF}" == '@'* ]]; then # assume it's a package name
-        EXEC="$(npm explore "${SEARCH_REF}" -- "npm bin")/${EXEC_NAME}"
+        EXEC="$(npm explore "${SEARCH_REF}" -- "npm root")/.bin/${EXEC_NAME}"
         if [[ -x "$EXEC" ]]; then
           echo "${EXEC}"
           return 0
@@ -23,7 +23,7 @@ function find_exec {
             echo "${EXEC_NAME}"
             return 0
           else # see if it's an NPM thing...
-            EXEC=$(npm bin)/$EXEC_NAME #
+            EXEC=$(npm root)/.bin/$EXEC_NAME #
             if [[ -x "$EXEC" ]]; then
               echo "${EXEC}"
               return 0
