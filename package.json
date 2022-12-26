@@ -12,10 +12,9 @@
     "pretest": "TEST_TYPES=unit catalyst-scripts pretest && mkdir -p test-tmp/ && npm run build",
     "test": "TEST_TYPES=unit catalyst-scripts test",
     "posttest": "rm -rf test-tmp/",
-    "preversion": "npm test",
-    "version": "npm run build && git add -fA dist",
-    "postversion": "git push && git push --tags",
     "prepare": "npm run build",
+    "preversion": "npm test",
+    "postversion": "git push && git push --tags",
     "install-clean": "rm -rf package-lock.json node_modules/ && npm install"
   },
   "repository": {
