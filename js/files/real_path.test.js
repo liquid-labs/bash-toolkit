@@ -30,8 +30,8 @@ afterAll(() => {
   shell.exec('rm -rf /tmp/foo')
 })
 
-const realFile = `/tmp/foo/real_dir/real_file`
-const realDir = expect.stringMatching(new RegExp(`/tmp/foo/real_dir\\s*$`))
+const realFile = '/tmp/foo/real_dir/real_file'
+const realDir = expect.stringMatching(new RegExp('/tmp/foo/real_dir\\s*$'))
 
 const verifyLink = (linkPath, expectedOut) => {
   const result =

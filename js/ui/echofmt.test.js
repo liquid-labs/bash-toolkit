@@ -29,7 +29,7 @@ describe('echofmt', () => {
 
   test('folds longer lines', () => {
     // 80 x a + ' abc' makes this 84 long and should trigger default fold
-    let ax80 = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    const ax80 = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
     const result = shell.exec(`${STRICT}; ${COMPILE_EXEC}; echofmt ${ax80} abc`, execOpts)
     const expectedOut = expect.stringMatching(new RegExp(`^.*${ax80} [\n]abc.*\n$`))
     assertMatchNoError(result, expectedOut)

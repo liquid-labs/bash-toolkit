@@ -124,13 +124,13 @@ describe('setSimpleOptions', () => {
   })
 
   describe('required value', () => {
-    test(`sets incoming value with long form 'opt=foo'`, () => {
+    test('sets incoming value with long form \'opt=foo\'', () => {
       const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; f() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "OPT: $OPT"; }; f --opt=foo`, execOpts)
       const expectedOut = expect.stringMatching(/^OPT: foo\n$/)
       assertMatchNoError(result, expectedOut)
     })
 
-    test(`results in error when no required value provided`, () => {
+    test('results in error when no required value provided', () => {
       const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; f() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "OPT: $OPT"; }; f --opt`, execOpts)
       const expectedErr = expect.stringMatching(/requires an argument\s*$/)
       expect(result.stderr).toEqual(expectedErr)
@@ -138,13 +138,13 @@ describe('setSimpleOptions', () => {
       expect(result.code).toBe(1)
     })
 
-    test(`supports mixed required and value-less options`, () => {
+    test('supports mixed required and value-less options', () => {
       const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; f() { eval "$(setSimpleOptions NOVAL OPT= -- "$@")"; echo "NOVAL: $NOVAL"; echo "OPT: $OPT"; }; f --noval; f --opt=foo; f --noval --opt=bar`, execOpts)
       const expectedOut = expect.stringMatching(/^NOVAL: true\nOPT: \nNOVAL: \nOPT: foo\nNOVAL: true\nOPT: bar\n$/)
       assertMatchNoError(result, expectedOut)
     })
 
-    test.each(["'",']'])(`properly escapse special char: %s`, (c) => {
+    test.each(["'", ']'])('properly escapse special char: %s', (c) => {
       const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; f() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "OPT: $OPT"; }; f --opt="foo${c}bar"`, execOpts)
       const expectedOut = expect.stringMatching(new RegExp(`^OPT: foo${c}bar\n`))// /^OPT: foo'bar\n$/)
       assertMatchNoError(result, expectedOut)
@@ -152,27 +152,27 @@ describe('setSimpleOptions', () => {
   }) // describe('required value'...
 
   describe('passthru values', () => {
-    test.each([[`--opt`, `OPT^`, `--opt`],
-      [`--opt foo`, `OPT^`, `--opt foo`],
-      [`-o`, `OPT^`, `-o`],
-      [`-Z`, `OPT:Z^`, `-Z`],
-      [`--opt=foo`, `OPT=^`, `--opt foo`],
-      [`-o foo`, `OPT=^`, `-o foo`],
-      [`--opt foo`, `OPT=^`, `--opt foo`],
-      [`--opt=foo --no-pass`, `OPT=^ NO_PASS`, `--opt foo`],
-      [`-Z foo`, `OPT:Z=^`, `-Z foo`],
-      [`--opt "foo bar"`, `OPT=^`, `--opt foo bar`],
-      [`--opt "foo 'bar"`, `OPT=^`, `--opt foo 'bar`],
-      [`--opt 'foo "bar'`, `OPT=^`, `--opt foo "bar`]])(
-      `remain on the positional when using options %s`, (args, spec, out) => {
+    test.each([['--opt', 'OPT^', '--opt'],
+      ['--opt foo', 'OPT^', '--opt foo'],
+      ['-o', 'OPT^', '-o'],
+      ['-Z', 'OPT:Z^', '-Z'],
+      ['--opt=foo', 'OPT=^', '--opt foo'],
+      ['-o foo', 'OPT=^', '-o foo'],
+      ['--opt foo', 'OPT=^', '--opt foo'],
+      ['--opt=foo --no-pass', 'OPT=^ NO_PASS', '--opt foo'],
+      ['-Z foo', 'OPT:Z=^', '-Z foo'],
+      ['--opt "foo bar"', 'OPT=^', '--opt foo bar'],
+      ['--opt "foo \'bar"', 'OPT=^', '--opt foo \'bar'],
+      ['--opt \'foo "bar\'', 'OPT=^', '--opt foo "bar']])(
+      'remain on the positional when using options %s', (args, spec, out) => {
         const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; function f() { eval "$(setSimpleOptions ${spec} -- "$@")"; echo "$@"; }; f ${args}`, execOpts)
         const expectedOut = expect.stringMatching(new RegExp(`^${out}\n$`))
         assertMatchNoError(result, expectedOut)
       })
 
-    test.each([[`--opt "foo bar"`, `foo bar`],
-      [`--opt "foo' bar"`, `foo' bar`]])(
-      `will properly passthrough complex parameters`, (args, out) => {
+    test.each([['--opt "foo bar"', 'foo bar'],
+      ['--opt "foo\' bar"', 'foo\' bar']])(
+      'will properly passthrough complex parameters', (args, out) => {
         const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; inner() { eval "$(setSimpleOptions OPT= -- "$@")"; echo "$OPT"; }; outer() { eval "$(setSimpleOptions OPT=^ -- "$@")"; inner "$@"; }; outer ${args}`, execOpts)
         const expectedOut = expect.stringMatching(new RegExp(`^${out}\n$`))
         assertMatchNoError(result, expectedOut)

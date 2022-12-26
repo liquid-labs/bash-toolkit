@@ -26,7 +26,7 @@ describe('list-add-item', () => {
     assertMatchNoError(result, expectedOut)
   })
 
-  test(`should build a string usable by 'for'`, () => {
+  test('should build a string usable by \'for\'', () => {
     const result =
       shell.exec(`${STRICT}; ${COMPILED_EXEC}; list-add-item LIST foo; list-add-item LIST bar; for i in $LIST; do echo $i; done`, execOpts)
     const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
@@ -60,16 +60,16 @@ describe('list-add-uniq', () => {
 describe('list-count', () => {
   test.each`
   list | output
-  ${''} | ${`0`}
-  ${`a\nb\nc`} | ${`3`}
-  `(`should echo '$output' for list '$list'`, ({list, output}) => {
+  ${''} | ${'0'}
+  ${'a\nb\nc'} | ${'3'}
+  `('should echo \'$output\' for list \'$list\'', ({ list, output }) => {
   const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST="${list}"; list-count LIST`, execOpts)
   const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
   assertMatchNoError(result, expectedOut)
 })
 })
 
-describe('list-from-csv', () =>{
+describe('list-from-csv', () => {
   test('should create a good list from empty csv', () => {
     const result =
       shell.exec(`${STRICT}; ${COMPILED_EXEC}; list-from-csv LIST ''; echo "\${LIST:-}"`, execOpts)
@@ -171,9 +171,9 @@ describe('list-get-item-by-prefix', () => {
 describe('list-join', () => {
   test.each`
   list | joiner | output
-  ${``} | ${`||`} | ${``}
-  ${`a\nb\nc`} | ${`||`} | ${`a||b||c`}
-  `(`should echo '$output' for list '$list' joined with '$joiner'`, ({list, joiner, output}) => {
+  ${''} | ${'||'} | ${''}
+  ${'a\nb\nc'} | ${'||'} | ${'a||b||c'}
+  `('should echo \'$output\' for list \'$list\' joined with \'$joiner\'', ({ list, joiner, output }) => {
   const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST="${list}"; list-join LIST '${joiner}'`, execOpts)
   const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
   assertMatchNoError(result, expectedOut)
@@ -197,8 +197,8 @@ describe('list-replace-by-string', () => {
 })
 
 describe('list-quote', () => {
-  test.each([[`"hey 'there"`, `'hey '"'"'there'`],
-    [`'hey "there'`, `'hey "there'`]])(
+  test.each([['"hey \'there"', '\'hey \'"\'"\'there\''],
+    ['\'hey "there\'', '\'hey "there\'']])(
     'properly escapes %s', (args, out) => {
       const result =
       shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST=billy$'\n'${args}; list-quote LIST`, execOpts)
@@ -245,17 +245,17 @@ describe('list-rm-item', () => {
 
   test.each`
   char | desc| testEntry
-  ${`@`} | ${`in the middle`} | ${`foo@bar`}
-  ${`@`} | ${`at front`} | ${`@foobar`}
-  ${`/`} | ${`in the middle`} | ${`foo/bar`}
-  ${`/`} | ${`at front`} | ${`/foobar`}
-  ${`#`} | ${`in the middle`} | ${`foo#bar`}
-  ${`#`} | ${`at front`} | ${`#foobar`}
-  ${`.`} | ${`in the middle`} | ${`.ar`}
-  ${`.`} | ${`at front`} | ${`b.r`}
-  ${`[`} | ${`in the middle`} | ${`b[a]r`}
-  ${`[`} | ${`at front`} | ${`[f]oo`}
-  `(`deals with special character '$char' $desc`, ({testEntry}) => {
+  ${'@'} | ${'in the middle'} | ${'foo@bar'}
+  ${'@'} | ${'at front'} | ${'@foobar'}
+  ${'/'} | ${'in the middle'} | ${'foo/bar'}
+  ${'/'} | ${'at front'} | ${'/foobar'}
+  ${'#'} | ${'in the middle'} | ${'foo#bar'}
+  ${'#'} | ${'at front'} | ${'#foobar'}
+  ${'.'} | ${'in the middle'} | ${'.ar'}
+  ${'.'} | ${'at front'} | ${'b.r'}
+  ${'['} | ${'in the middle'} | ${'b[a]r'}
+  ${'['} | ${'at front'} | ${'[f]oo'}
+  `('deals with special character \'$char\' $desc', ({ testEntry }) => {
   const result =
       shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST=foo$'\n'"${testEntry}"$'\n'bar; list-rm-item LIST "${testEntry}"; echo "$LIST"`, execOpts)
   const expectedOut = expect.stringMatching(/^foo\nbar\n$/)

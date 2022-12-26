@@ -3,13 +3,17 @@ const shell = require('shelljs')
 
 const execOpts = {
   shell  : shell.which('bash'),
-  silent : true,
+  silent : true
+}
+
+const assertNoError = (result) => {
+  expect(result.stderr).toEqual('')
+  expect(result.code).toBe(0)
 }
 
 const assertMatchNoError = (result, expectedOut) => {
-  expect(result.stderr).toEqual('')
+  assertNoError(result)
   expect(result.stdout).toEqual(expectedOut)
-  expect(result.code).toBe(0)
 }
 
 export {

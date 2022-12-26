@@ -27,7 +27,7 @@ test('find_exec will find global executables', () => {
   assertMatchNoError(result, expectedOut)
 })
 
-test('find_exec and require-exec will fail when no exec found', () =>{
+test('find_exec and require-exec will fail when no exec found', () => {
   // supresses err echo from shelljs
   console.error = jest.fn() // eslint-disable-line no-console
   let result = shell.exec(`${STRICT}; ${COMPILED_EXEC} && find_exec fizzyboo "$PWD"`, execOpts)
