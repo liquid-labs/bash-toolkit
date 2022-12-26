@@ -17,7 +17,8 @@ const assertMatchNoError = (result, expectedOut) => {
 }
 
 export {
-  shell,
+  assertMatchNoError,
+  assertNoError,
   execOpts,
-  assertMatchNoError
+  shell
 }
