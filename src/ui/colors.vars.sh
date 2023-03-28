@@ -7,7 +7,7 @@ purple=$(test -n "$TERM" && tput setaf 5)
 cyan=$(test -n "$TERM" && tput setaf 6)
 white=$(test -n "$TERM" && tput setaf 7)
 
-bold=$(test -n TERM && tput bold)
+bold=$(test -n "$TERM" && tput bold)
 red_b="${red}${bold}"
 green_b="${green}${bold}"
 yellow_b="${yellow}${bold}"
