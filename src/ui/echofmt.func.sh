@@ -36,7 +36,9 @@ echofmt() {
     [[ -n "${WIDTH:-}" ]] || WIDTH=$DEFAULT_WIDTH
     # ECHO_WIDTH and DEFAULT_WIDTH are both subject to actual terminal width limitations.
     local TERM_WIDITH
+    echo "BAR" #DEBUG
     TERM_WIDTH=$(test -n "$TERM" && tput cols || echo ${DEFAULT_WIDTH})
+    echo "RAB" #DEBUG
     (( ${TERM_WIDTH} >= ${WIDTH} )) || WIDTH=${TERM_WIDTH}
   }
 
