@@ -1,0 +1,22 @@
+PASS test-staging/ui/prompt.test.js (9.414 s)
+PASS test-staging/cli/options.test.js (7.242 s)
+       1
+PASS test-staging/bin/rollup-bash.test.js (5.523 s)
+PASS test-staging/ui/echofmt.test.js
+PASS test-staging/files/find_exec.test.js
+PASS test-staging/data/lists.test.js
+PASS test-staging/ui/select.test.js
+PASS test-staging/ui/stringlib.test.js
+PASS test-staging/files/real_path.test.js
+------------|---------|----------|---------|---------|-------------------
+File        | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+------------|---------|----------|---------|---------|-------------------
+All files   |     100 |      100 |     100 |     100 |                   
+ testlib.js |     100 |      100 |     100 |     100 |                   
+------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 9 passed, 9 total
+Tests:       174 passed, 174 total
+Snapshots:   0 total
+Time:        35.641 s, estimated 36 s
+Ran all test suites matching /.\/test-staging/i.
