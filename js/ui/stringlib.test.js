@@ -13,10 +13,10 @@ describe('field-to-label', () => {
   ${'Foo bar'} | ${'Foo bar'}
   ${''} | ${''}
   `('$input -> $output', ({ input, output }) => {
-  const result = shell.exec(`${STRICT}; ${COMPILE_EXEC} && echo -n $(field-to-label "${input}")`, execOpts)
-  const expectedOut = expect.stringMatching(output)
-  assertMatchNoError(result, expectedOut)
-})
+    const result = shell.exec(`${STRICT}; ${COMPILE_EXEC} && echo -n $(field-to-label "${input}")`, execOpts)
+    const expectedOut = expect.stringMatching(output)
+    assertMatchNoError(result, expectedOut)
+  })
 })
 
 describe('echo-label-and-values', () => {

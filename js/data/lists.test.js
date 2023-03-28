@@ -63,10 +63,10 @@ describe('list-count', () => {
   ${''} | ${'0'}
   ${'a\nb\nc'} | ${'3'}
   `('should echo \'$output\' for list \'$list\'', ({ list, output }) => {
-  const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST="${list}"; list-count LIST`, execOpts)
-  const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
-  assertMatchNoError(result, expectedOut)
-})
+    const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST="${list}"; list-count LIST`, execOpts)
+    const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
+    assertMatchNoError(result, expectedOut)
+  })
 })
 
 describe('list-from-csv', () => {
@@ -174,10 +174,10 @@ describe('list-join', () => {
   ${''} | ${'||'} | ${''}
   ${'a\nb\nc'} | ${'||'} | ${'a||b||c'}
   `('should echo \'$output\' for list \'$list\' joined with \'$joiner\'', ({ list, joiner, output }) => {
-  const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST="${list}"; list-join LIST '${joiner}'`, execOpts)
-  const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
-  assertMatchNoError(result, expectedOut)
-})
+    const result = shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST="${list}"; list-join LIST '${joiner}'`, execOpts)
+    const expectedOut = expect.stringMatching(new RegExp(`^${output}$`))
+    assertMatchNoError(result, expectedOut)
+  })
 })
 
 describe('list-replace-by-string', () => {
@@ -256,9 +256,9 @@ describe('list-rm-item', () => {
   ${'['} | ${'in the middle'} | ${'b[a]r'}
   ${'['} | ${'at front'} | ${'[f]oo'}
   `('deals with special character \'$char\' $desc', ({ testEntry }) => {
-  const result =
+    const result =
       shell.exec(`${STRICT}; ${COMPILED_EXEC}; LIST=foo$'\n'"${testEntry}"$'\n'bar; list-rm-item LIST "${testEntry}"; echo "$LIST"`, execOpts)
-  const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
-  assertMatchNoError(result, expectedOut)
-})
+    const expectedOut = expect.stringMatching(/^foo\nbar\n$/)
+    assertMatchNoError(result, expectedOut)
+  })
 })

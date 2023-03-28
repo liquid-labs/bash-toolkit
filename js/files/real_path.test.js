@@ -31,6 +31,7 @@ afterAll(() => {
 })
 
 const realFile = '/tmp/foo/real_dir/real_file'
+// eslint-disable-next-line prefer-regex-literals
 const realDir = expect.stringMatching(new RegExp('/tmp/foo/real_dir\\s*$'))
 
 const verifyLink = (linkPath, expectedOut) => {
