@@ -1,5 +1,4 @@
 # http://linuxcommand.org/lc3_adv_tput.php
-echo "FOO" #DEBUG
 red=$(test -n "$TERM" && tput setaf 1)
 green=$(test -n "$TERM" && tput setaf 2)
 yellow=$(test -n "$TERM" && tput setaf 3)
@@ -35,4 +34,3 @@ cyan_bu="${cyan}${bold}${underline}"
 white_bu="${white}${bold}${underline}"
 
 reset=$(test -n "$TERM" && tput sgr0)
-echo "OOF" #DEBUG
